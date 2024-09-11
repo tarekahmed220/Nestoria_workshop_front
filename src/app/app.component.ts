@@ -1,13 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { LayoutComponent } from './layout/layout.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { NavbarComponent } from "./navbar/navbar.component";
+import { SidebarComponent } from './sidebar/sidebar.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LayoutComponent, FontAwesomeModule],
+  imports: [
+    FontAwesomeModule,
+    LayoutComponent,
+    NavbarComponent,
+    SidebarComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  title = 'Nestoria_workshop_front';
+  isSidebarVisible = true;
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
+
+  ngOnInit() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    if (window.innerWidth < 768) {
+      this.isSidebarVisible = false;
+    } else {
+      this.isSidebarVisible = true;
+    }
+  }
 }
