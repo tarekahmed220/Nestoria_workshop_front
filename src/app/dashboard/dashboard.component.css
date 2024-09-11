@@ -1,27 +1,26 @@
- 
-     .bgColor{
-       background-color: #21222d;
-     }
-    .card {
-      background-color: #171821;
-      border: none;
-      /* box-shadow: 5px  #171821 ; */
-    }
-.color1{
-color: rgb(252, 184, 89);
+.bgColor {
+  background-color: #21222d;
 }
-.color2{
+.card {
+  background-color: #171821;
+  border: none;
+  /* box-shadow: 5px  #171821 ; */
+}
+.color1 {
+  color: rgb(252, 184, 89);
+}
+.color2 {
   color: rgb(169, 223, 216);
 }
-.color3{
+.color3 {
   color: rgb(242, 200, 237);
 }
-.color4{
+.color4 {
   color: rgb(32, 174, 243);
 }
 
 /* section toe */
-    h3 {
+h3 {
   font-size: 1.5rem;
 }
 
@@ -36,10 +35,7 @@ color: rgb(252, 184, 89);
   color: #ffffff;
 }
 
-
-
 /* three */
-
 
 #customTooltip {
   transition: all 0.2s ease-in-out;
@@ -58,7 +54,6 @@ color: rgb(252, 184, 89);
   font-weight: bold;
 }
 
-
 table {
   border-collapse: separate;
   border-spacing: 0 15px;
@@ -69,11 +64,10 @@ td {
 }
 
 .page-link {
-  color: #00aaff; /
+  color: #00aaff;
 }
 
 .page-item.active .page-link {
   background-color: #00aaff;
   border-color: #00aaff;
 }
-
