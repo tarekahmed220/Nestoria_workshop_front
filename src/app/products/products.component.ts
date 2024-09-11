@@ -24,7 +24,7 @@
 // })
 // export class ProductsComponent {
 //   products: Product[] = [
-    
+
 //     {
 //       id: 1,
 //       name: 'Product 1',
@@ -51,7 +51,7 @@
 //       imageUrl: 'images/about/shop-9-02.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 4,
@@ -61,7 +61,7 @@
 //       imageUrl: 'images/about/Home-2-Secton-2-03.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 5,
@@ -71,7 +71,7 @@
 //       imageUrl: 'images/about/shop-9-01.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 6,
@@ -81,7 +81,7 @@
 //       imageUrl: 'images/about/shop-2-04.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 7,
@@ -91,7 +91,7 @@
 //       imageUrl: 'images/about/shop-2-05.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 8,
@@ -101,7 +101,7 @@
 //       imageUrl: 'images/about/shop-5-04.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 9,
@@ -111,7 +111,7 @@
 //       imageUrl: 'images/about/shop-6-01.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //     {
 //       id: 10,
@@ -121,7 +121,7 @@
 //       imageUrl: 'images/about/shop-8-03.jpg',
 //       quantity: 2,
 //       color: 'Blue',
-      
+
 //     },
 //   ];
 
@@ -150,22 +150,21 @@
 //   }
 
 //   saveProduct() {
-    
+
 //     if (
-//       !this.selectedProduct?.name || 
-//       !this.selectedProduct?.description || 
-//       !this.selectedProduct?.price || 
+//       !this.selectedProduct?.name ||
+//       !this.selectedProduct?.description ||
+//       !this.selectedProduct?.price ||
 //       (!this.selectedProduct?.imageUrl && !this.selectedFile) // التحقق من الصورة أيضًا
 //     ) {
 //       this.showAlert('All fields are required, including the image!', 'warning');
 //       return;
 //     }
 
-    
 //     if (this.selectedFile) {
 //       const reader = new FileReader();
 //       reader.onload = (e: any) => {
-//         this.selectedProduct!.imageUrl = e.target.result; 
+//         this.selectedProduct!.imageUrl = e.target.result;
 //         this.finalizeProductSave();
 //       };
 //       reader.readAsDataURL(this.selectedFile);
@@ -223,7 +222,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faEdit, faTrash, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEdit,
+  faTrash,
+  faMinus,
+  faPlus,
+} from '@fortawesome/free-solid-svg-icons';
 import { HttpClient } from '@angular/common/http';
 
 interface Product {
@@ -251,7 +255,15 @@ export class ProductsComponent implements OnInit {
   faPlus = faPlus;
   selectedProduct: Product | null = null;
   isEditing = false;
-  availableColors: string[] = ['Red', 'Blue', 'Green', 'Yellow', 'Black', 'White', 'Orange'];
+  availableColors: string[] = [
+    'Red',
+    'Blue',
+    'Green',
+    'Yellow',
+    'Black',
+    'White',
+    'Orange',
+  ];
   alertMessage: string | null = null;
   alertType: 'success' | 'danger' | 'warning' = 'success';
   selectedFile: File | null = null;
@@ -266,10 +278,11 @@ export class ProductsComponent implements OnInit {
 
   getProducts() {
     this.http.get<Product[]>(`${this.apiUrl}/myproducts`).subscribe(
-      (data) => {this.products = data
-        console.log(data)
+      (data) => {
+        this.products = data;
+        console.log(data);
       },
-      
+
       (error) => this.showAlert('Failed to load products.', 'danger')
     );
   }
@@ -277,7 +290,14 @@ export class ProductsComponent implements OnInit {
   openModal(content: any, product?: Product) {
     this.selectedProduct = product
       ? { ...product, images: product.images || [] }
-      : { name: '', description: '', price: 0, images: [], quantity: 1, color: 'Red' };
+      : {
+          name: '',
+          description: '',
+          price: 0,
+          images: [],
+          quantity: 1,
+          color: 'Red',
+        };
     this.isEditing = !!product;
     this.modalService.open(content);
   }
@@ -289,7 +309,10 @@ export class ProductsComponent implements OnInit {
       this.selectedProduct?.price === undefined ||
       (this.selectedProduct?.images.length === 0 && !this.selectedFile)
     ) {
-      this.showAlert('All fields are required, including the image!', 'warning');
+      this.showAlert(
+        'All fields are required, including the image!',
+        'warning'
+      );
       return;
     }
 
@@ -307,13 +330,15 @@ export class ProductsComponent implements OnInit {
 
   finalizeProductSave() {
     if (this.isEditing && this.selectedProduct?._id) {
-      this.http.put(`${this.apiUrl}/${this.selectedProduct._id}`, this.selectedProduct).subscribe(
-        () => {
-          this.getProducts();
-          this.showAlert('Product updated successfully!', 'success');
-        },
-        () => this.showAlert('Failed to update product.', 'danger')
-      );
+      this.http
+        .put(`${this.apiUrl}/${this.selectedProduct._id}`, this.selectedProduct)
+        .subscribe(
+          () => {
+            this.getProducts();
+            this.showAlert('Product updated successfully!', 'success');
+          },
+          () => this.showAlert('Failed to update product.', 'danger')
+        );
     } else {
       this.http.post(this.apiUrl, this.selectedProduct).subscribe(
         () => {
