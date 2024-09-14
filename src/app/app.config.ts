@@ -8,11 +8,13 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { authInterceptor } from './services/auth.interceptor';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
+ 
   ],
 };
