@@ -1,14 +1,17 @@
 import { Component, signal, computed } from '@angular/core';
+
 import {
   ChartData,
   ChartOptions,
   ChartType,
   ChartConfiguration,
 } from 'chart.js';
+
 import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BarChartComponent } from '../bar-chart/bar-chart.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
