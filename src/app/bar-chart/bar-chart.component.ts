@@ -64,7 +64,7 @@ export class BarChartComponent {
     datasets: [
       {
         label: 'This Month',
-        data: [500, 800, 960, 700, 650, 820, 950],
+        data: [600, 500, 960, 700, 650, 820, 950],
         // borderColor: '#42A5F5',
         // backgroundColor: 'rgba(66, 165, 245, 0.2)',
         tension: 0.4,
@@ -122,7 +122,7 @@ export class BarChartComponent {
             ? chart.data.datasets[datasetIndex].data[elementIndex]
             : 'N/A';
 
-        alert(`Label: ${label}\nValue: ${value}`); // تظهر البيانات في رسالة منبثقة
+        // alert(`Label: ${label}\nValue: ${value}`); 
       }
     },
   };

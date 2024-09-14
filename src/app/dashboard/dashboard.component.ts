@@ -45,6 +45,7 @@ export class DashboardComponent {
     datasets: [
       { label: 'Volume', data: [79, 80, 75, 90], backgroundColor: '#72d7d2' },
       { label: 'Service', data: [78, 81, 70, 95], backgroundColor: '#43425D' },
+      
     ],
   };
 

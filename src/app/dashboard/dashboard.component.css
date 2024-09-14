@@ -80,12 +80,6 @@ color: rgb(252, 184, 89);
   font-weight: bold;
 }
 
-
-table {
-  border-collapse: separate;
-  border-spacing: 0 15px;
-}
-
 td {
   vertical-align: middle;
 }

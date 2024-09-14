@@ -46,10 +46,10 @@
 </div>
 
 <!-- start section tow -->
-<div class="container m-4">
+<div class="container mt-4">
   <div class="row">
     <!-- عمود الرسم البياني -->
-    <div class="col-md-5 bgColor p-3">
+    <div class="col-md-5 bgColor ">
       <h3 class="text-white mb-4"><i class="fa fa-bar-chart"></i> Level</h3>
       <canvas
         baseChart
@@ -60,7 +60,7 @@
       </canvas>
     </div>
     <!-- عمود المنتجات -->
-    <div class="col-md-6 offset-md-1 bgColor p-3">
+    <div class="col-md-6 offset-md-1 bgColor p-0">
       <h3 class="text-white mb-4"><i class="fa fa-list"></i> Top Products</h3>
       <table class="table">
         <thead>
@@ -100,16 +100,9 @@
 </div>
 <!-- end section tow -->
 <!-- start section three -->
-<div class="container m-3 bgColor p-3">
-  <div class="row">
-    <div class="col-md-4">
+
       <app-bar-chart></app-bar-chart>
-    </div>
-    <div class="col-md-8 ">
-      <app-bar-chart></app-bar-chart>
-    </div>
-  </div>
-</div>
+    
 
 <!-- end section three -->
 
@@ -119,12 +112,12 @@
     <div class="mt-4">
       <h2 class="text-white">Customers</h2>
       <!-- Table for displaying customers -->
-      <table class="table table-dark table-hover">
+      <table class="table table-dark  ">
         <thead>
-          <tr>
+          <tr class="col-md-12">
             <th></th>
             <th>Name</th>
-            <th>Email</th>
+            <!-- <th>Email</th> -->
             <th>Phone</th>
             <th>Billing Address</th>
             <th>Total Spent</th>
@@ -134,7 +127,7 @@
         <tbody>
           <!-- Iterate over visible customers -->
           @for (customer of visibleCustomers(); track $index) {
-          <tr>
+          <tr class="col-md-2">
             <!-- Placeholder for profile icon -->
             <td>
               <span
@@ -144,10 +137,10 @@
               >
             </td>
             <td>{{ customer.name }}</td>
-            <td>{{ customer.email }}</td>
+            <!-- <td  style="max-width: 130px;">{{ customer.email }}</td> -->
             <td>{{ customer.phone }}</td>
             <td>{{ customer.address }}</td>
-            <td>${{ customer.totalSpent.toFixed(2) }}</td>
+            <td style="max-width: 80px;">${{ customer.totalSpent.toFixed(2) }}</td>
             <td>
               <!-- Action buttons with FontAwesome icons -->
               <button class="btn btn-sm text-primary m-1">

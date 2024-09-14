@@ -1,3 +1,126 @@
-<p class="text-danger">orderssss works! <i class="fa fa-star"></i></p>
-<i class="fa-regular fa-star"></i>
-<i class="fas fa-coffee"></i>
+<div class="container mt-5">
+  <h2 class="text-center text-light">Orders Management</h2>
+
+  <!-- التبويبات (Tabs) -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        [class.active]="activeTab === 'pending'"
+        (click)="selectTab('pending')"
+        >Pending Orders</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        [class.active]="activeTab === 'shipped'"
+        (click)="selectTab('shipped')"
+        >Shipped Orders</a
+      >
+    </li>
+  </ul>
+
+  <!-- الطلبات غير المشحونة -->
+  <div *ngIf="activeTab === 'pending'">
+    <h3 class="text-light m-2">Pending Orders</h3>
+    <table class="table table-dark table-bordered">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <!-- العمود الجديد للكمية -->
+          <th>Customer</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders()">
+          <td>
+            <img [src]="order.imageUrl" alt="{{ order.product }}" width="50" />
+          </td>
+          <td>{{ order.product }}</td>
+          <td>{{ order.price | currency }}</td>
+          <td class="quantity-controls">
+            
+              <!-- زري زيادة وتقليل الكمية -->
+              <button
+                class="btn btn-secondary btn-sm"
+                (click)="decreaseQuantity(order.id)"
+              >
+                -
+              </button>
+              <span class="quantity-value">{{ order.quantity }}</span>
+              <button
+                class="btn btn-secondary btn-sm"
+                (click)="increaseQuantity(order.id)"
+              >
+                +
+              </button>
+           
+          </td>
+
+          <td>{{ order.customerName }}</td>
+          <td>
+            <!-- زر الشحن يظهر فقط في الطلبات غير المشحونة -->
+            <button
+              *ngIf="!order.shipped"
+              class="btn btn-success me-2"
+              (click)="shipOrder(order.id)"
+            >
+              <i class="fas fa-shipping-fast"></i> Ship Order
+            </button>
+            <!-- زر إلغاء الطلب يظهر فقط في الطلبات المشحونة -->
+            <button
+              *ngIf="order.shipped"
+              class="btn btn-danger"
+              (click)="cancelOrder(order.id)"
+            >
+              <i class="fas fa-times"></i> Cancel Order
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- الطلبات المشحونة -->
+  <div *ngIf="activeTab === 'shipped'">
+    <h3 class="text-light m-2">Shipped Orders</h3>
+    <table class="table table-dark table-bordered">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <!-- العمود الجديد للكمية -->
+          <th>Customer</th>
+          <th>Order Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of shippedOrders">
+          <td>
+            <img [src]="order.imageUrl" alt="{{ order.product }}" width="50" />
+          </td>
+          <td>{{ order.product }}</td>
+          <td>{{ order.price | currency }}</td>
+          <td>{{ order.quantity }}</td>
+          <!-- عرض الكمية المشحونة -->
+          <td>{{ order.customerName }}</td>
+          <td>{{ order.orderDate | date : "short" }}</td>
+          <td>
+            <!-- زر إلغاء الشحن يظهر فقط في الطلبات المشحونة -->
+            <button class="btn btn-danger" (click)="cancelOrder(order.id)">
+              <i class="fas fa-times"></i> Cancel Order
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
