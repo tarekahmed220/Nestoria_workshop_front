@@ -1,10 +1,17 @@
 import { Component, signal, computed } from '@angular/core';
-import { ChartData, ChartOptions, ChartType } from 'chart.js';
+
+import {
+  ChartData,
+  ChartOptions,
+  ChartType,
+  ChartConfiguration,
+} from 'chart.js';
+
 import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BarChartComponent } from '../bar-chart/bar-chart.component';
-import { ChartConfiguration } from 'chart.js';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -14,7 +21,6 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class DashboardComponent {
   // section tow
-
   // إعدادات الرسم البياني
   public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
@@ -42,6 +48,7 @@ export class DashboardComponent {
     datasets: [
       { label: 'Volume', data: [79, 80, 75, 90], backgroundColor: '#72d7d2' },
       { label: 'Service', data: [78, 81, 70, 95], backgroundColor: '#43425D' },
+      
     ],
   };
 
@@ -50,99 +57,12 @@ export class DashboardComponent {
   // بيانات المنتجات
   products = [
     { name: 'Home Decore Range', popularity: 78, color: '#FFC107' },
-    { name: 'Disney Princess Dress', popularity: 62, color: '#00BCD4' },
+    { name: 'Disney Princess Dress', popularity: 62, color: '#a9dfd8' },
     { name: 'Bathroom Essentials', popularity: 51, color: '#03A9F4' },
     { name: 'Apple Smartwatch', popularity: 29, color: '#E91E63' },
   ];
   //end section tow
   //start section three
-  // إعداد نوع الرسم البياني كـ "خط"
-  public lineChartType: ChartType | any = 'line';
-
-  // إعداد البيانات والإعدادات للرسم البياني
-  public lineChartData: ChartData<'line'> = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      {
-        label: 'This Month',
-        data: [500, 800, 960, 700, 650, 820, 950],
-        // borderColor: '#42A5F5',
-        // backgroundColor: 'rgba(66, 165, 245, 0.2)',
-        tension: 0.4,
-        fill: true, // لتلوين المنطقة تحت الخط
-      },
-      {
-        label: 'Last Month',
-        data: [400, 600, 884, 680, 620, 790, 870],
-        // borderColor: '#9C27B0',
-        // backgroundColor: 'rgba(156, 39, 176, 0.2)',
-        tension: 0.4,
-        fill: true, // لتلوين المنطقة تحت الخط
-      },
-    ],
-  };
-
-  // إعداد خيارات الرسم البياني
-  public lineChartOptions: ChartConfiguration<'line'>['options'] = {
-    responsive: true,
-    plugins: {
-      tooltip: {
-        enabled: false, // إلغاء تفعيل الـ tooltip الافتراضي لعرض tooltip مخصص
-        external: (context) => {
-          const tooltipModel = context.tooltip;
-          if (tooltipModel.opacity === 0) {
-            this.hideCustomTooltip();
-            return;
-          }
-          const position = context.chart.canvas.getBoundingClientRect();
-          this.showCustomTooltip(
-            position.left + tooltipModel.caretX,
-            position.top + tooltipModel.caretY,
-            tooltipModel.dataPoints[0].label,
-            tooltipModel.dataPoints[0].formattedValue
-          );
-        },
-      },
-    },
-    hover: {
-      mode: 'nearest',
-      intersect: true,
-    },
-    // التعامل مع الضغط على النقاط لعرض بياناتها
-    onClick: (event, elements, chart) => {
-      if (elements.length > 0) {
-        const elementIndex = elements[0].index;
-        const datasetIndex = elements[0].datasetIndex;
-
-        // التحقق من وجود labels و data قبل الاستخدام
-        const label = chart.data.labels
-          ? chart.data.labels[elementIndex]
-          : 'N/A';
-        const value =
-          chart.data.datasets[datasetIndex].data[elementIndex] !== undefined
-            ? chart.data.datasets[datasetIndex].data[elementIndex]
-            : 'N/A';
-
-        alert(`Label: ${label}\nValue: ${value}`); // تظهر البيانات في رسالة منبثقة
-      }
-    },
-  };
-  Math: any;
-
-  // دالة لإظهار الـ tooltip المخصص عند تمرير الفأرة
-  showCustomTooltip(x: number, y: number, label: string, value: string) {
-    const tooltip = document.getElementById('customTooltip');
-    tooltip!.style.left = `${x}px`;
-    tooltip!.style.top = `${y}px`;
-    tooltip!.innerHTML = `<b>${label}</b><br> Value: ${value}`;
-    tooltip!.style.display = 'block';
-  }
-
-  // دالة لإخفاء الـ tooltip عند عدم التمرير
-  hideCustomTooltip() {
-    const tooltip = document.getElementById('customTooltip');
-    tooltip!.style.display = 'none';
-  }
 
   //end section three
   //start section five
@@ -182,7 +102,6 @@ export class DashboardComponent {
       address: '101 Pine Road, Orlando, FL',
       totalSpent: 923.0,
     },
-    // Add more customers for pagination
     {
       name: 'John Doe',
       email: 'john@example.com',
@@ -197,7 +116,27 @@ export class DashboardComponent {
       address: '123 Sunset Blvd, LA, CA',
       totalSpent: 500.0,
     },
-    // Add more if needed for testing
+    {
+      name: 'Isaac Neville',
+      email: 'isaac@example.com',
+      phone: '(555) 456-7890',
+      address: '101 Pine Road, Orlando, FL',
+      totalSpent: 923.0,
+    },
+    {
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '(555) 555-5555',
+      address: '789 Broadway, NYC, NY',
+      totalSpent: 302.5,
+    },
+    {
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      phone: '(555) 222-4444',
+      address: '123 Sunset Blvd, LA, CA',
+      totalSpent: 500.0,
+    },
   ]);
 
   // Calculate total number of pages

@@ -23,7 +23,11 @@
 h3 {
   font-size: 1.5rem;
 }
-
+.update-table {
+  background-color: transparent!important;
+  color: white;
+  border-bottom: none;
+}
 .list-group-item {
   border: none;
   margin-bottom: 10px;
@@ -34,6 +38,27 @@ h3 {
   font-size: 1rem;
   color: #ffffff;
 }
+
+.progress-bar-container {
+  width: 100px; /* يمكنك تعديل العرض ليتناسب مع التصميم */
+  height: 6px; /* سمك شريط التقدم */
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+
+.badge:hover {
+  filter: brightness(1.1); /* تأثير التفتيح عند التحريك */
+}
+
+
+
+
 
 /* three */
 
@@ -54,17 +79,17 @@ h3 {
   font-weight: bold;
 }
 
-table {
-  border-collapse: separate;
-  border-spacing: 0 15px;
-}
 
 td {
   vertical-align: middle;
 }
 
 .page-link {
-  color: #00aaff;
+  color: black; /
+}
+.pagination-color {
+background-color: black!important;
+
 }
 
 .page-item.active .page-link {
