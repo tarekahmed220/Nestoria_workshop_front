@@ -11,6 +11,7 @@ interface Order {
   customerName: string;
   orderDate: Date;
   shipped: boolean;
+  sent: boolean; // خاصية جديدة لمعرفة ما إذا تم إرسال الطلب
   imageUrl: string; // إضافة الصورة لكل طلب
   quantity: number; // خاصية الكمية الجديدة
 }
@@ -32,6 +33,7 @@ export class OrdersComponent {
       customerName: 'John Doe',
       orderDate: new Date(),
       shipped: false,
+      sent: false, // خاصية معرفة هل تم الإرسال
       imageUrl: 'https://via.placeholder.com/50x50?text=Laptop', // صورة المنتج
       quantity: 1, // الكمية الافتراضية
     },
@@ -42,6 +44,7 @@ export class OrdersComponent {
       customerName: 'Jane Smith',
       orderDate: new Date(),
       shipped: false,
+      sent: false, // خاصية معرفة هل تم الإرسال
       imageUrl: 'https://via.placeholder.com/50x50?text=Phone', // صورة المنتج
       quantity: 1, // الكمية الافتراضية
     },
@@ -52,6 +55,7 @@ export class OrdersComponent {
       customerName: 'Alice Brown',
       orderDate: new Date(),
       shipped: false,
+      sent: false, // خاصية معرفة هل تم الإرسال
       imageUrl: 'https://via.placeholder.com/50x50?text=Headphones', // صورة المنتج
       quantity: 1, // الكمية الافتراضية
     },
@@ -71,50 +75,46 @@ export class OrdersComponent {
   // دالة لشحن الطلب
   shipOrder(id: number) {
     this.orders.update((orders) => {
+      // تحديث الطلب كـ shipped ونقله إلى قائمة shippedOrders
+      const updatedOrders = orders.map((order) => {
+        if (order.id === id) {
+          order.shipped = true; // تغيير حالة الشحن
+          order.sent = false; // لم يتم الإرسال بعد
+          this.shippedOrders.push(order); // إضافة الطلب لقائمة الطلبات المشحونة
+        }
+        return order;
+      });
+
+      // حذف الطلب من قائمة الطلبات المعلقة
+      return updatedOrders.filter((order) => order.id !== id);
+    });
+  }
+
+  // دالة لإرسال الطلب بعد شحنه
+  sendOrder(id: number) {
+    this.orders.update((orders) => {
       return orders.map((order) => {
         if (order.id === id) {
-          order.shipped = true;
-          this.shippedOrders.push(order); // إضافة الطلب لقائمة الطلبات المشحونة
+          order.sent = true; // تغيير حالة الإرسال
         }
         return order;
       });
     });
   }
 
-  // دالة لإلغاء الشحن
+  // دالة لحذف الطلب نهائيًا من قائمة الطلبات المعلقة
+  deleteOrder(id: number) {
+    this.orders.update(
+      (orders) => orders.filter((order) => order.id !== id) // حذف الطلب
+    );
+  }
+
+  // دالة لحذف الطلب نهائيًا من قائمة الطلبات المشحونة وأيضًا من قائمة الطلبات المعلقة
   cancelOrder(id: number) {
-    this.shippedOrders = this.shippedOrders.filter((order) => order.id !== id); // إزالة الطلب من الطلبات المشحونة
-    this.orders.update((orders) =>
-      orders.map((order) => {
-        if (order.id === id) {
-          order.shipped = false; // إعادة حالة الشحن إلى false
-        }
-        return order;
-      })
-    );
-  }
+    // حذف الطلب من قائمة الطلبات المشحونة
+    this.shippedOrders = this.shippedOrders.filter((order) => order.id !== id);
 
-  // دالة لزيادة الكمية
-  increaseQuantity(id: number) {
-    this.orders.update((orders) =>
-      orders.map((order) => {
-        if (order.id === id) {
-          order.quantity += 1; // زيادة الكمية
-        }
-        return order;
-      })
-    );
-  }
-
-  // دالة لتقليل الكمية
-  decreaseQuantity(id: number) {
-    this.orders.update((orders) =>
-      orders.map((order) => {
-        if (order.id === id && order.quantity > 1) {
-          order.quantity -= 1; // تقليل الكمية (بشرط ألا تكون أقل من 1)
-        }
-        return order;
-      })
-    );
+    // حذف الطلب من قائمة الطلبات المعلقة
+    this.orders.update((orders) => orders.filter((order) => order.id !== id));
   }
 }
