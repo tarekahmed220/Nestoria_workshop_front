@@ -1,17 +1,14 @@
 import { Component, signal, computed } from '@angular/core';
-
 import {
   ChartData,
   ChartOptions,
   ChartType,
   ChartConfiguration,
 } from 'chart.js';
-
 import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BarChartComponent } from '../bar-chart/bar-chart.component';
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -48,7 +45,6 @@ export class DashboardComponent {
     datasets: [
       { label: 'Volume', data: [79, 80, 75, 90], backgroundColor: '#72d7d2' },
       { label: 'Service', data: [78, 81, 70, 95], backgroundColor: '#43425D' },
-      
     ],
   };
 
