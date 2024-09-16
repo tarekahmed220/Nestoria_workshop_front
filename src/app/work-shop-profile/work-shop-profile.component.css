@@ -1,0 +1,39 @@
+/* Custom style for invalid feedback and input fields */
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block;
+  color: #dc3545;
+}
+
+input.ng-touched.ng-invalid {
+  border-color: #dc3545;
+}
+
+input.ng-touched.ng-valid {
+  border-color: #28a745;
+}
+.form-label {
+  font-weight: bold;
+  color: #f8f9fa;
+
+}
+
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #f8f9fa;
+  color: #495057;
+}
+
+img {
+  max-width: 150px;
+  border-radius: 50%;
+}
+
+button {
+  margin-top: 10px;
+}

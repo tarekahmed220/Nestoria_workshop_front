@@ -6,6 +6,7 @@ import { ProductsComponent } from './products/products.component';
 import { ProfileComponent } from './profile/profile.component';
 import { ChatComponent } from './chat/chat.component';
 import { PagenotfoundComponent } from './pagenotfound/pagenotfound.component';
+import { WorkshopProfileComponent } from './work-shop-profile/work-shop-profile.component';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,7 @@ export const routes: Routes = [
       { path: 'products', component: ProductsComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'chat', component: ChatComponent },
+      { path: "workShopProfile", component:WorkshopProfileComponent},
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', component: PagenotfoundComponent },
     ],
