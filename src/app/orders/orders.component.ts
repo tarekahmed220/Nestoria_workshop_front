@@ -3,7 +3,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common'; // استيراد CommonModule
 
-// بيانات الطلبات الوهمية
+
 interface Order {
   id: number;
   product: string;
@@ -11,9 +11,9 @@ interface Order {
   customerName: string;
   orderDate: Date;
   shipped: boolean;
-  sent: boolean; // خاصية جديدة لمعرفة ما إذا تم إرسال الطلب
-  imageUrl: string; // إضافة الصورة لكل طلب
-  quantity: number; // خاصية الكمية الجديدة
+  sent: boolean; 
+  imageUrl: string; 
+  quantity: number; 
 }
 
 @Component({
