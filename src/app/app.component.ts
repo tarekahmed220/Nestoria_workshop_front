@@ -3,6 +3,7 @@ import { LayoutComponent } from './layout/layout.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NavbarComponent } from "./navbar/navbar.component";
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { WorkshopProfileComponent } from './work-shop-profile/work-shop-profile.component';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -11,6 +12,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
     LayoutComponent,
     NavbarComponent,
     SidebarComponent,
+    WorkshopProfileComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
