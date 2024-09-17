@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -22,5 +21,9 @@ export class NavbarComponent {
     document
       .querySelector('.main-content')!
       .setAttribute('style', 'margin-left: 0;');
+  }
+  logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'http://localhost:3000/login';
   }
 }
