@@ -1,6 +1,6 @@
-import { NgIf, NgFor, NgClass, CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, signal, computed } from '@angular/core';
 
 interface Chat {
   name: string;
@@ -10,41 +10,45 @@ interface Chat {
 interface Message {
   text: string;
   time: string;
-  imageUrl?: string; 
+  imageUrl?: string;
 }
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent {
   chats: Chat[] = [
-    { name: 'Youssef Makhlouf', time: '09:24 PM' },
-    { name: 'Tarek Ahmed', time: '09:24 PM' },
+    { name: 'Ahmed Joba 🦅', time: '09:24 PM' },
+    { name: 'Ahmed Tarek ♥️👬', time: '09:24 PM' },
+    { name: 'Youssef Makhlouf 💪👬', time: '09:24 PM' },
+    { name: 'Tarek Ahmed  ♥️', time: '09:24 PM' },
+    { name: 'nour', time: '09:24 PM' },
+    { name: 'abdo', time: '09:24 PM' },
+    { name: 'hend', time: '09:24 PM' },
   ];
 
-  filteredChats: Chat[] = [...this.chats]; 
-  searchText = ''; 
+  filteredChats: Chat[] = [...this.chats];
+  searchText = '';
+  messages: Message[] = [];
+  selectedChat: Chat | null = this.chats[0];
+  messageText = '';
 
-  messages: Message[] = []; 
+  modalImage: string | null = null; // لإدارة النافذة المنبثقة للصور
 
-  selectedChat: Chat | null = this.chats[0]; 
-  messageText = ''; 
-
-  
+  // تصفية الدردشات
   filterChats() {
     this.filteredChats = this.chats.filter((chat) =>
       chat.name.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
 
-  
+  // اختيار الدردشة
   selectChat(chat: Chat) {
     this.selectedChat = chat;
-    
   }
 
   // إرسال الرسائل
@@ -55,7 +59,24 @@ export class ChatComponent {
         time: new Date().toLocaleTimeString(),
       };
       this.messages.push(newMessage);
+
+      // تحديث الوقت في الـ Sidebar
+      if (this.selectedChat) {
+        this.selectedChat.time = newMessage.time;
+      }
+
       this.messageText = '';
+
+      // التمرير التلقائي عند إضافة رسالة جديدة
+      setTimeout(() => this.scrollToBottom(), 0);
+    }
+  }
+
+  // التمرير التلقائي لأسفل
+  scrollToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
   }
 
@@ -69,18 +90,24 @@ export class ChatComponent {
 
   // التعامل مع الملف المرفوع
   handleFileInput(event: any) {
-    const file: File = event.target.files[0]; // الملف الذي تم رفعه
+    const file: File = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => {
-        // إضافة الرسالة مع الصورة
         this.messages.push({
-          text: '', // لا نحتاج لنص إذا كانت الرسالة عبارة عن صورة
+          text: '',
           time: new Date().toLocaleTimeString(),
-          imageUrl: reader.result as string, // إضافة الصورة
+          imageUrl: reader.result as string,
         });
+
+        // تحديث الوقت في الـ Sidebar عند إرسال صورة
+        if (this.selectedChat) {
+          this.selectedChat.time = new Date().toLocaleTimeString();
+        }
+
+        setTimeout(() => this.scrollToBottom(), 0); // التمرير التلقائي بعد إضافة الصورة
       };
-      reader.readAsDataURL(file); // تحويل الملف إلى base64
+      reader.readAsDataURL(file);
     }
   }
 
@@ -89,5 +116,15 @@ export class ChatComponent {
     if (event.key === 'Enter') {
       this.sendMessage();
     }
+  }
+
+  // فتح النافذة المنبثقة للصورة
+  openImageModal(imageUrl: string) {
+    this.modalImage = imageUrl;
+  }
+
+  // غلق النافذة المنبثقة للصورة
+  closeImageModal() {
+    this.modalImage = null;
   }
 }
