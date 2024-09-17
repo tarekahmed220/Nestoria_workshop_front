@@ -1,7 +1,6 @@
-import 'zone.js'; // Required for Angular
-import { bootstrapApplication } from '@angular/platform-browser';
+import 'zone.js'; 
 import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common'; // استيراد CommonModule
+import { CommonModule } from '@angular/common'; 
 
 
 interface Order {
@@ -24,7 +23,6 @@ interface Order {
   styleUrl: './orders.component.css',
 })
 export class OrdersComponent {
-  // قائمة الطلبات باستخدام signals
   orders = signal<Order[]>([
     {
       id: 1,
@@ -33,31 +31,9 @@ export class OrdersComponent {
       customerName: 'John Doe',
       orderDate: new Date(),
       shipped: false,
-      sent: false, // خاصية معرفة هل تم الإرسال
-      imageUrl: 'https://via.placeholder.com/50x50?text=Laptop', // صورة المنتج
-      quantity: 1, // الكمية الافتراضية
-    },
-    {
-      id: 2,
-      product: 'Phone',
-      price: 800,
-      customerName: 'Jane Smith',
-      orderDate: new Date(),
-      shipped: false,
-      sent: false, // خاصية معرفة هل تم الإرسال
-      imageUrl: 'https://via.placeholder.com/50x50?text=Phone', // صورة المنتج
-      quantity: 1, // الكمية الافتراضية
-    },
-    {
-      id: 3,
-      product: 'Headphones',
-      price: 200,
-      customerName: 'Alice Brown',
-      orderDate: new Date(),
-      shipped: false,
-      sent: false, // خاصية معرفة هل تم الإرسال
-      imageUrl: 'https://via.placeholder.com/50x50?text=Headphones', // صورة المنتج
-      quantity: 1, // الكمية الافتراضية
+      sent: false, 
+      imageUrl: 'https://via.placeholder.com/50x50?text=Laptop', 
+      quantity: 1, 
     },
   ]);
 
