@@ -23,6 +23,21 @@ export class ProductsComponent implements OnInit {
   faEdit = faEdit;
   selectedProduct: Product | null = null;
   availableColors: string[] = ['Red', 'Blue', 'Green', 'Yellow', 'Black', 'White', 'Orange'];
+  availableCategory: string[] = [ "Sofa",
+    "Outdoor Sofa",
+    "Dining Table",
+    "Coffee Table",
+    "Bookshelf",
+    "Bed Frame",
+    "Desk",
+    "Wardrobe",
+    "Couch",
+    "Bed",
+    "Recliners",
+    "Home Decoration",
+    "Office Decoration",
+    "Indoor Decoration",
+    "Outdoor Decoration",];
   alertMessage: string | null = null;
   alertType: 'success' | 'danger' | 'warning' = 'success';
   selectedFiles: File[] = [];
