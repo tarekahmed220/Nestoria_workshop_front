@@ -72,9 +72,15 @@
         </select>
       </div>
       <div class="mb-3">
+        <label for="productCategory" class="form-label">productCategory</label>
+        <select [(ngModel)]="selectedProduct!.category" id="productCategory" class="form-control">
+          <option *ngFor="let category of availableCategory" [value]="category">{{category }}</option>
+        </select>
+      </div>
+      <!-- <div class="mb-3">
         <label for="productCategory" class="form-label">Product Category</label>
         <input [(ngModel)]="selectedProduct!.category" type="text" id="productCategory" class="form-control" required />
-      </div>
+      </div> -->
       <div class="mb-3">
         <label for="productQuantity" class="form-label">Product Quantity</label>
         <input [(ngModel)]="selectedProduct!.quantity" type="number" id="productQuantity" class="form-control" required />
