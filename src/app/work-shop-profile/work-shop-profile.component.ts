@@ -1,107 +1,111 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-work-shop-profile',
-//   standalone: true,
-//   imports: [],
-//   templateUrl: './work-shop-profile.component.html',
-//   styleUrl: './work-shop-profile.component.css'
-// })
-// export class WorkShopProfileComponent {
-
-// }
-
-// import { Component } from '@angular/core';
-// import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-// import { CustomValidators } from '../custom-validators';
 // import { CommonModule } from '@angular/common';
+// import { Component } from '@angular/core';
+// import { FormsModule } from '@angular/forms';
 // @Component({
 //   selector: 'app-workshop-profile',
-//   standalone: true,
 //   templateUrl: './work-shop-profile.component.html',
 //   styleUrls: ['./work-shop-profile.component.css'],
+//   standalone: true,
 //   imports: [
-//     CommonModule,
-//     FormsModule,
-//     ReactiveFormsModule
-//   ]
+// CommonModule,
+// FormsModule,
+//   ],
 // })
 // export class WorkshopProfileComponent {
-//   workshopForm: FormGroup;
+//   workshop = {
+//     title: 'Introduction to Woodworking',
+//     date: '2023-06-15',
+//     time: '10:00 AM - 4:00 PM',
+//     location: '123 Main St, Anytown USA',
+//     instructor: 'John Doe',
+//     capacity: 20,
+//     registrations: 15,
 
-//   constructor(private fb: FormBuilder) {
-//     this.workshopForm = this.fb.group({
-//       name: ['', [Validators.required, Validators.maxLength(50), CustomValidators.alphabetic]],
-//       email: ['', [Validators.required, Validators.email]],
-//       phone: ['', [Validators.required, CustomValidators.phoneNumber]],
-//       address: ['', [Validators.maxLength(100)]],
-//       workshopName: ['', [Validators.required, Validators.maxLength(50), CustomValidators.alphanumeric]],
-//       licenseNumber: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9]{10}$/)]],
-//       website: ['', [CustomValidators.optionalUrl]] // Optional, but must be valid if filled
-//     });
+//     description:
+//       'Learn the basics of woodworking, including safety, tools, and techniques.',
+//     image: 'https://via.placeholder.com/150',
+//   };
+
+//   editMode = false;
+
+//   toggleEditMode() {
+//     this.editMode = !this.editMode;
 //   }
 
-//   // Method to handle form submission
-//   onSubmit() {
-//     if (this.workshopForm.valid) {
-//       console.log('Form Submitted:', this.workshopForm.value);
-//     } else {
-//       console.log('Form is invalid');
+//   onFileSelected(event: any) {
+//     const file = event.target.files[0];
+//     if (file) {
+//       const reader = new FileReader();
+//       reader.onload = (e: any) => {
+//         this.workshop.image = e.target.result;
+//       };
+//       reader.readAsDataURL(file);
 //     }
 //   }
 
-//   // Helper method for easier validation feedback in template
-//   hasError(field: string, error: string) {
-//     const control = this.workshopForm.get(field);
-//     return control?.hasError(error) && control.touched;
+//   saveWorkshop() {
+//     // Logic to save updated workshop details (can be API call or local save)
+//     this.toggleEditMode();
 //   }
+
+
 // }
-
-
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-// import { NgIf, NgFor, FormsModule } from '@angular/common';
 
 @Component({
-  selector: 'app-workshop-owner',
-  standalone: true,
+  selector: 'app-workshop-profile',
   templateUrl: './work-shop-profile.component.html',
   styleUrls: ['./work-shop-profile.component.css'],
-  imports: [ FormsModule,NgIf,NgFor,CommonModule]  // استيراد NgIf و FormsModule بشكل مباشر
+  standalone: true,
+  imports: [CommonModule, FormsModule],
 })
 export class WorkshopProfileComponent {
-  isEditing: boolean = false;
-
-  // بيانات صاحب الورشة بدون نموذج
-  owner = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phoneNumber: '123-456-7890',
-    address: '123 Main St, City, Country',
-    workshopName: 'John’s Auto Workshop',
-    licenseNumber: 'ABC1234567',
-    avatarUrl: 'https://example.com/avatar.jpg'
+  workshop = {
+    title: 'Introduction to Woodworking',
+    date: '2023-06-15',
+    time: '10:00 AM - 4:00 PM',
+    location: '123 Main St, Anytown USA',
+    instructor: 'John Doe',
+    capacity: 20,
+    registrations: 15,
+    description: 'Learn the basics of woodworking, including safety, tools, and techniques.',
+    image: 'https://via.placeholder.com/150',
   };
 
-  enableEditing() {
-    this.isEditing = true;
+  editMode = false;
+
+  constructor() {
+    this.loadWorkshopFromLocalStorage();
   }
 
-  saveChanges() {
-    this.isEditing = false;
+  toggleEditMode() {
+    this.editMode = !this.editMode;
   }
 
-  // تحميل الصورة الجديدة
-  onAvatarSelected(event: any) {
+  onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.owner.avatarUrl = e.target.result;  // تحديث رابط الصورة بعد رفع الصورة
+        this.workshop.image = e.target.result;
       };
       reader.readAsDataURL(file);
     }
+  }
 
+  saveWorkshop() {
+    this.toggleEditMode();
+    // Save workshop details to localStorage
+    localStorage.setItem('workshop', JSON.stringify(this.workshop));
+  }
+
+  loadWorkshopFromLocalStorage() {
+    // Check if there is workshop data in localStorage
+    const savedWorkshop = localStorage.getItem('workshop');
+    if (savedWorkshop) {
+      this.workshop = JSON.parse(savedWorkshop);
+    }
   }
 }
