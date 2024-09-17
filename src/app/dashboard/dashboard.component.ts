@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import {
   ChartData,
   ChartOptions,
@@ -9,6 +9,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BarChartComponent } from '../bar-chart/bar-chart.component';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -16,7 +17,24 @@ import { BarChartComponent } from '../bar-chart/bar-chart.component';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
+  constructor(private route: ActivatedRoute, private router: Router) {}
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const token = params['token'];
+      if (token) {
+        localStorage.setItem('token', token);
+      } else {
+        const token = localStorage.getItem('token');
+        if (token) {
+          this.router.navigate([`/dashboard/${token}`]);
+        } else {
+          window.location.href = 'http://localhost:3000/login';
+        }
+      }
+    });
+  }
+
   // section tow
   // إعدادات الرسم البياني
   public barChartOptions: ChartOptions<'bar'> = {
