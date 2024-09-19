@@ -20,16 +20,16 @@ export class OrdersService {
 
   allOrders!: any[];
   id: string = '66d87cbeb4d55d64579e20cc';
-  getAllOrders(id: string): Observable<any> {
-    return this.http.post<any>(this.apiAllOrders, { id });
+  getAllOrders(): Observable<any> {
+    return this.http.get<any>(this.apiAllOrders);
   }
 
-  getPendingOrders(id: string): Observable<any> {
-    return this.http.post<any>(this.apiPendingOrders, { id });
+  getPendingOrders(): Observable<any> {
+    return this.http.get<any>(this.apiPendingOrders);
   }
 
-  getShippedOrders(id: string): Observable<any> {
-    return this.http.post<any>(this.apiShippedOrders, { id }).pipe(
+  getShippedOrders(): Observable<any> {
+    return this.http.get<any>(this.apiShippedOrders).pipe(
       catchError((error) => {
         console.error('Error fetching shipped orders:', error);
         return throwError(error);
@@ -37,12 +37,12 @@ export class OrdersService {
     );
   }
 
-  updateOrderStatus(id: string, productId: string, orderId: string): Observable<any> {
-    return this.http.put<any>(this.apiUpdateOrders, { id, productId, orderId });
+  updateOrderStatus(productId: string, orderId: string): Observable<any> {
+    return this.http.put<any>(this.apiUpdateOrders, { productId, orderId });
   }
 
-  cancelOrder(id: string, productId: string, orderId: string): Observable<any> {
-    const body = { id, productId, orderId };
+  cancelOrder(productId: string, orderId: string): Observable<any> {
+    const body = { productId, orderId };
     return this.http.delete<any>(this.apiCancelOrders, { body });
   }
 }

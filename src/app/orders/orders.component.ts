@@ -18,15 +18,15 @@ export class OrdersComponent implements OnInit {
 
   constructor(private ordersServ: OrdersService) {}
   functions() {
-    this.ordersServ.getAllOrders(this.id).subscribe((order) => {
+    this.ordersServ.getAllOrders().subscribe((order) => {
       this.orders = order;
       console.log(order);
     });
-    this.ordersServ.getPendingOrders(this.id).subscribe((order) => {
+    this.ordersServ.getPendingOrders().subscribe((order) => {
       this.pendingOrders = order;
       console.log(order);
     });
-    this.ordersServ.getShippedOrders(this.id).subscribe(
+    this.ordersServ.getShippedOrders().subscribe(
       (response) => {
         if (response.message === 'No shipped orders found for this workshop') {
           console.log(response.message);
@@ -56,8 +56,8 @@ export class OrdersComponent implements OnInit {
   }
 
   shipOrder(productId: string, orderId: string) {
-    console.log(this.id, productId, orderId);
-    this.ordersServ.updateOrderStatus(this.id, productId, orderId).subscribe(
+    console.log(productId, orderId);
+    this.ordersServ.updateOrderStatus(productId, orderId).subscribe(
       (response) => {
         console.log('Order updated successfully:', response);
         this.functions();
@@ -70,8 +70,8 @@ export class OrdersComponent implements OnInit {
 
   sendOrder(id: string) {}
   deleteOrder(productId: string, orderId: string) {
-    console.log(this.id, productId, orderId);
-    this.ordersServ.cancelOrder(this.id, productId, orderId).subscribe(
+    console.log(productId, orderId);
+    this.ordersServ.cancelOrder(productId, orderId).subscribe(
       (response) => {
         console.log('Order canceled successfully:', response);
         this.functions();
@@ -82,8 +82,8 @@ export class OrdersComponent implements OnInit {
     );
   }
   cancelOrder(productId: string, orderId: string) {
-    console.log(this.id, productId, orderId);
-    this.ordersServ.cancelOrder(this.id, productId, orderId).subscribe(
+    console.log(productId, orderId);
+    this.ordersServ.cancelOrder(productId, orderId).subscribe(
       (response) => {
         console.log('Order canceled successfully:', response);
         this.functions();
