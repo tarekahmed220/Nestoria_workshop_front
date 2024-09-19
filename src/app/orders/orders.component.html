@@ -1,3 +1,156 @@
-<p class="text-danger">orderssss works! <i class="fa fa-star"></i></p>
-<i class="fa-regular fa-star"></i>
-<i class="fas fa-coffee"></i>
+<div class="container mt-5">
+  <h2 class="text-center text-light">Orders Management</h2>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        role="button"
+        [class.active]="activeTab === 'pending'"
+        (click)="selectTab('pending')"
+        >Pending Orders</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        role="button"
+        [class.active]="activeTab === 'shipped'"
+        (click)="selectTab('shipped')"
+        >Shipped Orders</a
+      >
+    </li>
+  </ul>
+
+  <!-- الطلبات غير المشحونة -->
+  @if (activeTab === 'pending') {
+  <div>
+    <h3 class="text-light m-2">Pending Orders</h3>
+    <table style="max-width: 100%" class="table table-dark table-bordered">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Color</th>
+          <th>Quantity</th>
+          <th>Customer</th>
+          <th>Shipping Address</th>
+          <th>Actions</th>
+          <!-- <th>Workshop</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of pendingOrders; track $index) { @for(product of
+        order.products; track $index){
+        <tr>
+          <td>
+            <img
+              [src]="product.productId.images[0]"
+              alt="{{ product.productId.name }}"
+              width="50"
+            />
+          </td>
+          <td>{{ product.productId.name }}</td>
+          <td>{{ product.productId.price | currency }}</td>
+          <td>{{ product.color }}</td>
+          <td class="quantity-controls">
+            <span class="quantity-value">{{ product.quantity }}</span>
+          </td>
+          <td>{{ order.userId.fullName }}</td>
+          <td>
+            <span>{{ order.userId.address }}</span
+            >, <span>{{ order.shippingAddress.city }}</span
+            >,<br />
+            <span>{{ order.shippingAddress.houseNumber }}</span
+            >,<br />
+            <span>{{ order.shippingAddress.apartment }}</span>
+          </td>
+          <td>
+            <!-- زر الشحن يظهر فقط في الطلبات غير المشحونة -->
+            @if (!order.shipped) {
+            <button class="btn btn-success me-2" (click)="shipOrder(product.productId._id,product._id)">
+              <i class="fas fa-shipping-fast"></i> Ship Order
+            </button>
+            }
+
+            <!-- زر الإرسال يظهر بعد الشحن -->
+            @if (order.shipped && !order.sent) {
+            <button class="btn btn-primary me-2" (click)="sendOrder(order.id)">
+              <i class="fas fa-paper-plane"></i> Send Order
+            </button>
+            }
+
+            <!-- زر حذف الطلب يظهر إذا لم يتم الإرسال -->
+            @if (!order.sent) {
+            <button class="btn btn-danger" (click)="deleteOrder(product.productId._id,product._id)">
+              <i class="fas fa-trash"></i> Delete Order
+            </button>
+            }
+          </td>
+          <!-- <td>{{product.productId["workshop_id"]}}</td> -->
+        </tr>
+        } }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  <!-- الطلبات المشحونة -->
+  @if (activeTab === 'shipped') {
+  <div>
+    <h3 class="text-light m-2">Shipped Orders</h3>
+    <table class="table table-dark table-bordered">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Color</th>
+          <th>Quantity</th>
+          <th>Customer</th>
+          <th>Shipping Address</th>
+          <th>Order Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of shippedOrders; track $index) { @for(product of
+        order.products; track $index){
+        <tr>
+          <td>
+            <img
+              [src]="product.productId.images[0]"
+              alt="{{ product.productId.name }}"
+              width="50"
+            />
+          </td>
+          <td>{{ product.productId.name }}</td>
+          <td>{{ product.productId.price | currency }}</td>
+          <td>{{ product.color }}</td>
+          <td class="quantity-controls">
+            <span class="quantity-value">{{ product.quantity }}</span>
+          </td>
+          <td>{{ order.userId.fullName }}</td>
+          <td>
+            <span>{{ order.userId.address }}</span
+            >, <span>{{ order.shippingAddress.city }}</span
+            >,<br />
+            <span>{{ order.shippingAddress.houseNumber }}</span
+            >,<br />
+            <span>{{ order.shippingAddress.apartment }}</span>
+          </td>
+          <td>{{ order.orderDate | date : "short" }}</td>
+          <td>
+            <button class="btn btn-danger" (click)="cancelOrder(product.productId._id,product._id)">
+              <i class="fas fa-times"></i> Cancel Order
+            </button>
+          </td>
+        </tr>
+        }}
+      </tbody>
+    </table>
+  </div>
+  }
+</div>
