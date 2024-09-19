@@ -1,10 +1,3 @@
-/* .custom-button-bg{
-    background-color: rgb(169, 223, 216) !important;
-    border-color: rgb(169, 223, 216) !important;
-    color: black !important; 
-  } */
-  
-
 .custom-button-bg {
   background-color: transparent !important; 
   border-color: rgb(169, 223, 216) !important; 
@@ -34,4 +27,8 @@
 .custom-button-bg:focus {
   outline: none; 
   box-shadow: 0 0 0 2px rgb(169, 223, 216); 
+}
+.card {
+  background-color: #2B2B2B;
+  color: white;
 }

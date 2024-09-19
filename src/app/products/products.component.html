@@ -1,29 +1,18 @@
-<div class="container" style="background-color: #101010">
+<div class="container" style="background-color: #101010;">
   <h2 class="my-4 text-center text-white">Workshop Products</h2>
 
-  <button
-    class="btn custom-button-bg mb-3 shadow-sm"
-    (click)="openModal(content)"
-  >
+  <button class="btn custom-button-bg mb-3 shadow-sm" (click)="openModal(content)">
     Add New Product
   </button>
 
-  <div
-    *ngIf="alertMessage"
-    class="alert alert-{{ alertType }} alert-dismissible fade show"
-    role="alert"
-  >
+  <div *ngIf="alertMessage" class="alert alert-{{ alertType }} alert-dismissible fade show" role="alert">
     {{ alertMessage }}
-    <button
-      type="button"
-      class="btn-close"
-      aria-label="Close"
-      (click)="closeAlert()"
-    ></button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeAlert()"></button>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-dark text-white rounded-3 shadow-sm">
+  <!-- Display as table on large screens, and as cards on medium and small screens -->
+  <div class="d-lg-table d-md-block">
+    <table class="table table-dark text-white rounded-3 shadow-sm d-none d-lg-table">
       <thead class="thead-light">
         <tr>
           <th scope="col">Image</th>
@@ -38,137 +27,134 @@
       </thead>
       <tbody>
         <tr *ngFor="let product of products">
-          <td>
-            <img
-              [src]="product.images[0]"
-              alt="Product Image"
-              style="width: 100px; height: auto"
-            />
-          </td>
+          <td><img [src]="product.images[0]" alt="Product Image" style="width: 100px; height: auto;" /></td>
           <td>{{ product.name }}</td>
           <td>{{ product.description }}</td>
           <td>{{ product.price | currency }}</td>
-          <td>{{ product.color }}</td>
+          <td>
+            <div *ngFor="let color of product.color" [ngStyle]="{'background-color': color, 'width': '20px', 'height': '20px', 'border-radius': '50%'}"></div>
+          </td>
           <td>{{ product.category }}</td>
           <td>{{ product.quantity }}</td>
           <td>
-            <button
-              class="btn custom-button-bg shadow-sm"
-              (click)="deleteProduct(product._id)"
-            >
+            <button class="btn custom-button-bg shadow-sm mb-2 me-2" (click)="openDeleteModal(deleteModal, product._id)">
               <fa-icon [icon]="faTrash"></fa-icon>
             </button>
-
-            <button
-              class="btn custom-button-bg shadow-sm"
-              (click)="openModal(content, product)"
-            >
+            <button class="btn custom-button-bg shadow-sm" (click)="openModal(content, product)">
               <fa-icon [icon]="faEdit"></fa-icon>
             </button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Display as cards on small and medium screens -->
+    <div *ngFor="let product of products" class="card mb-4 d-lg-none">
+      <div class="card-body">
+        <img [src]="product.images[0]" alt="Product Image" class="card-img-top mb-3" />
+        <h5 class="card-title">{{ product.name }}</h5>
+        <p class="card-text">{{ product.description }}</p>
+        <p class="card-text"><strong>Price:</strong> {{ product.price | currency }}</p>
+        <p class="card-text"><strong>Category:</strong> {{ product.category }}</p>
+        <p class="card-text"><strong>Quantity:</strong> {{ product.quantity }}</p>
+        <div class="d-flex align-items-center">
+          <strong>Colors:</strong>
+          <div *ngFor="let color of product.color" [ngStyle]="{'background-color': color, 'width': '20px', 'height': '20px', 'border-radius': '50%', 'margin-left': '10px'}"></div>
+        </div>
+        <div class="mt-3">
+          <button class="btn custom-button-bg shadow-sm me-2" (click)="openDeleteModal(deleteModal, product._id)">
+            <fa-icon [icon]="faTrash"></fa-icon>
+          </button>
+          <button class="btn custom-button-bg shadow-sm" (click)="openModal(content, product)">
+            <fa-icon [icon]="faEdit"></fa-icon>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <ng-template #content let-modal>
-    <div class="modal-header" style="background-color: #2b2b2b">
-      <h5 class="modal-title text-white">
-        {{ isEditMode ? "Edit" : "Add" }} Product
-      </h5>
-      <button
-        type="button"
-        class="btn-close text-white"
-        aria-label="Close"
-        (click)="modal.dismiss()"
-      ></button>
+    <div class="modal-header" style="background-color: #2B2B2B;">
+      <h5 class="modal-title text-white">{{ isEditMode ? 'Edit' : 'Add' }} Product</h5>
+      <button type="button" class="btn-close text-white" aria-label="Close" (click)="modal.dismiss()"></button>
     </div>
-    <div class="modal-body" style="background-color: #1f1f1f; color: white">
+    <div class="modal-body" style="background-color: #1F1F1F; color: white;">
       <div class="mb-3">
         <label for="productName" class="form-label">Product Name</label>
-        <input
-          [(ngModel)]="selectedProduct!.name"
-          type="text"
-          id="productName"
-          class="form-control"
-          required
-        />
+        <input [(ngModel)]="selectedProduct!.name" type="text" id="productName" class="form-control" required />
       </div>
       <div class="mb-3">
-        <label for="productDescription" class="form-label"
-          >Product Description</label
-        >
-        <textarea
-          [(ngModel)]="selectedProduct!.description"
-          id="productDescription"
-          class="form-control"
-          required
-        ></textarea>
+        <label for="productNameArabic" class="form-label">Product Name in Arabic</label>
+        <input [(ngModel)]="selectedProduct!.nameInArabic" type="text" id="productNameArabic" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label for="productDescription" class="form-label">Product Description</label>
+        <textarea [(ngModel)]="selectedProduct!.description" id="productDescription" class="form-control" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="productDescriptionArabic" class="form-label">Product Description in Arabic</label>
+        <textarea [(ngModel)]="selectedProduct!.descriptionInArabic" id="productDescriptionArabic" class="form-control" required></textarea>
       </div>
       <div class="mb-3">
         <label for="productPrice" class="form-label">Product Price</label>
-        <input
-          [(ngModel)]="selectedProduct!.price"
-          type="number"
-          id="productPrice"
-          class="form-control"
-          required
-        />
+        <input [(ngModel)]="selectedProduct!.price" type="number" id="productPrice" class="form-control" required />
       </div>
       <div class="mb-3">
-        <label for="productColor" class="form-label">Product Color</label>
-        <select
-          [(ngModel)]="selectedProduct!.color"
-          id="productColor"
-          class="form-control"
-        >
-          <option *ngFor="let color of availableColors" [value]="color">
-            {{ color }}
-          </option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="productCategory" class="form-label">productCategory</label>
+        <label for="productCategory" class="form-label">Product Category</label>
         <select [(ngModel)]="selectedProduct!.category" id="productCategory" class="form-control">
-          <option *ngFor="let category of availableCategory" [value]="category">{{category }}</option>
+          <option *ngFor="let category of availableCategory" [value]="category">{{ category }}</option>
         </select>
       </div>
       <div class="mb-3">
         <label for="productQuantity" class="form-label">Product Quantity</label>
-        <input
-          [(ngModel)]="selectedProduct!.quantity"
-          type="number"
-          id="productQuantity"
-          class="form-control"
-          required
-        />
+        <input [(ngModel)]="selectedProduct!.quantity" type="number" id="productQuantity" class="form-control" required />
       </div>
       <div class="mb-3">
+        <label for="productColor" class="form-label">Colors</label>
+        <div *ngFor="let color of colorInputs; let i = index" class="mb-2 d-flex align-items-center">
+          <input [(ngModel)]="colorInputs[i]" type="color" class="form-control form-control-color" [value]="colorInputs[i]" />
+          <button type="button" class="btn btn-danger ms-2" (click)="removeColor(i)">
+            <fa-icon [icon]="faMinus"></fa-icon>
+          </button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-success" (click)="addColor()">
+        <fa-icon [icon]="faPlus"></fa-icon> Add Color
+      </button>
+      <div class="mb-3">
         <label for="productImages" class="form-label">Product Images</label>
-        <input
-          type="file"
-          id="productImages"
-          (change)="onFileSelected($event)"
-          multiple
-          class="form-control"
-        />
+        <input type="file" id="productImages" (change)="onFileSelected($event)" multiple class="form-control" />
+        <div *ngIf="selectedFiles.length === 0 && filePreview && Object.keys(filePreview).length > 0" class="mt-2">
+          <h6>Current Images:</h6>
+          <div *ngFor="let preview of filePreview | keyvalue" class="mb-2">
+            <img [src]="preview.value" alt="Preview" style="width: 100px; height: auto;" />
+          </div>
+        </div>
+        <div *ngIf="selectedFiles.length > 0" class="mt-2">
+          <h6>Selected Images:</h6>
+          <div *ngFor="let file of selectedFiles" class="mb-2">
+            <img [src]="filePreview[file.name]" alt="Preview" style="width: 100px; height: auto;" />
+          </div>
+        </div>
       </div>
     </div>
-    <div class="modal-footer" style="background-color: #2b2b2b">
-      <button
-        type="button"
-        class="btn custom-button-bg"
-        (click)="modal.dismiss()"
-      >
-        Close
-      </button>
-      <button
-        type="button"
-        class="btn custom-button-bg shadow-sm"
-        (click)="saveProduct()"
-      >
-        {{ isEditMode ? "Update Product" : "Add Product" }}
-      </button>
+    <div class="modal-footer" style="background-color: #2B2B2B;">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+      <button type="button" class="btn custom-button-bg" (click)="saveProduct()">{{ isEditMode ? 'Save Changes' : 'Add Product' }}</button>
+    </div>
+  </ng-template>
+
+  <ng-template #deleteModal let-modal>
+    <div class="modal-header" style="background-color: #2B2B2B;">
+      <h5 class="modal-title text-white">Delete Product</h5>
+      <button type="button" class="btn-close text-white" aria-label="Close" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body" style="background-color: #1F1F1F; color: white;">
+      <p>Are you sure you want to delete this product?</p>
+    </div>
+    <div class="modal-footer" style="background-color: #2B2B2B;">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+      <button type="button" class="btn btn-danger" (click)="modal.close('confirm')">Delete</button>
     </div>
   </ng-template>
 </div>
