@@ -1,5 +1,5 @@
 <div class="container-fluid vh-100">
-  <div class="row p-3 h-100">
+  <div class="row p-3 h-75">
     <!-- Sidebar -->
     <div class="col-3 bg-dark text-light p-0 sidebar">
       <div class="d-flex align-items-center p-3">
@@ -96,8 +96,8 @@
 </div>
 
 <!-- Image Modal for enlarged image with Close Button -->
- @if (modalImage) {
-<div  class="image-modal">
+@if (modalImage) {
+<div class="image-modal">
   <span class="close-modal" (click)="closeImageModal()">X</span>
   <img [src]="modalImage" class="enlarged-image" alt="Enlarged Image" />
 </div>

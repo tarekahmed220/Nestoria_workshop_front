@@ -17,7 +17,10 @@
   <div class="d-flex align-items-center notification-profile">
     <i class="fas fa-bell m-2 fs-4 text-light"></i>
     <div class="profile-section">
-      <img src="https://via.placeholder.com/40" alt="Profile Image" />
+      <img
+        [src]="userDate?.registrationDocuments.personalPhoto"
+        alt="Profile Image"
+      />
       <div class="dropdown">
         <button
           class="btn text-light dropdown-toggle"
@@ -26,7 +29,7 @@
           data-bs-toggle="dropdown"
           aria-expanded="false"
         >
-          User
+          {{ userDate?.fullName }}
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
           <li><a class="dropdown-item" href="#">View Profile</a></li>

@@ -10,6 +10,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BarChartComponent } from '../bar-chart/bar-chart.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { ProfileService } from '../services/profile.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -18,7 +20,13 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  balance!: number;
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private _ProfileService: ProfileService,
+    private _http: HttpClient
+  ) {}
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       const token = params['token'];
@@ -33,6 +41,14 @@ export class DashboardComponent implements OnInit {
         }
       }
     });
+
+    this._http
+      .get('http://localhost:5000/api/v1/admin/get-balance')
+      .subscribe((res: any) => {
+        this.balance = res.sellerBalance
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      });
   }
 
   // section tow
