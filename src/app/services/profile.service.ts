@@ -49,7 +49,7 @@ export class ProfileService {
 
   // Update profile data
   updateProfileData(workshop: any): Observable<any> {
-    return this.http.put('http://localhost:5000/api/v1/fur/users/myprofile', workshop).pipe(
+    return this.http.patch('http://localhost:5000/api/v1/fur/workshops/updateworkshop', workshop).pipe(
       map((res: any) => {
         console.log('Profile updated successfully:', res);
         return res;
