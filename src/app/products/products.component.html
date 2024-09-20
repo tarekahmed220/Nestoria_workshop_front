@@ -11,7 +11,7 @@
   </div>
 
   <!-- Display as table on large screens, and as cards on medium and small screens -->
-  <div class="d-lg-table d-md-block">
+  <div class="d-lg-flex justify-content-center">
     <table class="table table-dark text-white rounded-3 shadow-sm d-none d-lg-table">
       <thead class="thead-light">
         <tr>
@@ -32,12 +32,12 @@
           <td>{{ product.description }}</td>
           <td>{{ product.price | currency }}</td>
           <td>
-            <div *ngFor="let color of product.color" [ngStyle]="{'background-color': color, 'width': '20px', 'height': '20px', 'border-radius': '50%'}"></div>
+            <div *ngFor="let color of product.color" [ngStyle]="{'background-color': color, 'width': '20px', 'height': '20px', 'border-radius': '50%' , 'margin-bottom': '5px'}"></div>
           </td>
           <td>{{ product.category }}</td>
           <td>{{ product.quantity }}</td>
           <td>
-            <button class="btn custom-button-bg shadow-sm mb-2 me-2" (click)="openDeleteModal(deleteModal, product._id)">
+            <button class="btn custom-button-bg shadow-sm me-2" (click)="openDeleteModal(deleteModal, product._id)">
               <fa-icon [icon]="faTrash"></fa-icon>
             </button>
             <button class="btn custom-button-bg shadow-sm" (click)="openModal(content, product)">
@@ -121,22 +121,32 @@
       <button type="button" class="btn btn-success" (click)="addColor()">
         <fa-icon [icon]="faPlus"></fa-icon> Add Color
       </button>
+      
       <div class="mb-3">
         <label for="productImages" class="form-label">Product Images</label>
         <input type="file" id="productImages" (change)="onFileSelected($event)" multiple class="form-control" />
+      
+        <!-- Current Images -->
         <div *ngIf="selectedFiles.length === 0 && filePreview && Object.keys(filePreview).length > 0" class="mt-2">
           <h6>Current Images:</h6>
-          <div *ngFor="let preview of filePreview | keyvalue" class="mb-2">
-            <img [src]="preview.value" alt="Preview" style="width: 100px; height: auto;" />
+          <div class="d-flex flex-wrap">
+            <div *ngFor="let preview of filePreview | keyvalue" class="me-2 mb-2">
+              <img [src]="preview.value" alt="Preview" style="width: 100px; height: auto;" />
+            </div>
           </div>
         </div>
+      
+        <!-- Selected Images -->
         <div *ngIf="selectedFiles.length > 0" class="mt-2">
           <h6>Selected Images:</h6>
-          <div *ngFor="let file of selectedFiles" class="mb-2">
-            <img [src]="filePreview[file.name]" alt="Preview" style="width: 100px; height: auto;" />
+          <div class="d-flex flex-wrap">
+            <div *ngFor="let file of selectedFiles" class="me-2 mb-2">
+              <img [src]="filePreview[file.name]" alt="Preview" style="width: 100px; height: auto;" />
+            </div>
           </div>
         </div>
       </div>
+      
     </div>
     <div class="modal-footer" style="background-color: #2B2B2B;">
       <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
