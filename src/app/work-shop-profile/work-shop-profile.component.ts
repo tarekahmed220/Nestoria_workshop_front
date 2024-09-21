@@ -143,7 +143,7 @@ export class WorkshopProfileComponent implements OnInit {
     this.getWorkshopData(); // Fetch workshop data on component load
   }
 
-  // Fetch workshop data
+  // Fetch workshop data from the profile service
   getWorkshopData() {
     this.profileService.getProfileData().subscribe(
       (data) => {
@@ -160,12 +160,11 @@ export class WorkshopProfileComponent implements OnInit {
     );
   }
 
-  // Toggle edit mode for the form
+  // Toggle edit mode, copying the original data to a temporary object if in edit mode
   toggleEditMode() {
     this.editMode = !this.editMode;
     if (this.editMode) {
-      // Copy the workshop data to a temporary object
-      this.workshopTemp = { ...this.workshop };
+      this.workshopTemp = { ...this.workshop }; // Copy the workshop data into a temporary object
     }
   }
 
@@ -175,13 +174,11 @@ export class WorkshopProfileComponent implements OnInit {
     const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
 
     if (file && this.workshopTemp) {
-      // Check file type
       if (!validImageTypes.includes(file.type)) {
         this.errorMessage = 'Invalid file type. Only JPG, JPEG, and PNG are allowed.';
         return;
       }
 
-      // Check file size (e.g., max 5MB)
       const maxSizeInMB = 5;
       if (file.size > maxSizeInMB * 1024 * 1024) {
         this.errorMessage = 'File size exceeds the 5MB limit.';
@@ -196,35 +193,43 @@ export class WorkshopProfileComponent implements OnInit {
     }
   }
 
-  // Save workshop data (calls update service method)
+  // Save workshop data, update the original data, and toggle edit mode off
   saveWorkshop() {
-    if (this.workshopTemp.valid) {
-      if (this.workshopTemp.password && this.workshopTemp.password !== this.workshopTemp.confirmPassword) {
-        this.errorMessage = 'Passwords do not match!';
-        return;
-      }
-
-      this.profileService.updateProfileData(this.workshopTemp).subscribe(
-        (response) => {
-          // Apply the changes from the temporary object to the original object
-          this.workshop = { ...this.workshopTemp };
-          console.log('Workshop updated successfully');
-          this.errorMessage = ''; // Clear any error messages
-          this.toggleEditMode();
-        },
-        (error) => {
-          if (error.status === 400) {
-            this.errorMessage = 'Invalid data provided. Please check the form and try again.';
-          } else if (error.status === 500) {
-            this.errorMessage = 'Server error. Please try again later.';
-          } else {
-            this.errorMessage = 'An unexpected error occurred. Please try again.';
-          }
-          console.error('Error:', error);
-        }
-      );
-    } else {
-      this.errorMessage = 'Please fill out the form correctly.';
+    if (!this.workshopTemp.name || !this.workshopTemp.email || !this.workshopTemp.phone || !this.workshopTemp.address) {
+      this.errorMessage = 'Please fill out all required fields correctly.';
+      return;
     }
+
+    this.profileService.updateProfileData(this.workshopTemp).subscribe(
+      (response) => {
+        this.workshop = { ...this.workshopTemp, ...response }; // Update original workshop data
+        this.errorMessage = '';
+        this.toggleEditMode(); // Exit edit mode
+        console.log('Workshop updated successfully:', this.workshop);
+      },
+      (error) => {
+        console.error('Error updating profile data:', error);
+        this.errorMessage = 'Failed to update profile. Please try again.';
+      }
+    );
+  }
+
+  // Cancel edit mode, discard changes
+  cancelEdit() {
+    this.toggleEditMode(); // Simply toggle off the edit mode
+  }
+
+  // Handle API errors gracefully
+  private handleError(error: any) {
+    if (error.status === 400) {
+      this.errorMessage = 'Invalid data provided. Please check the form and try again.';
+    } else if (error.status === 500) {
+      this.errorMessage = 'Server error. Please try again later.';
+    } else {
+      this.errorMessage = 'An unexpected error occurred. Please try again.';
+    }
+    console.error('Error:', error);
   }
 }
+
+

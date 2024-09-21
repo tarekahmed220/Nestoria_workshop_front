@@ -4,13 +4,13 @@
     <div class="row align-items-center">
       <div class="col-md-4 text-center">
         <img
-          [src]="workshop.personalPhoto || 'https://via.placeholder.com/150'"
+          [src]="workshop.photo || 'https://via.placeholder.com/150'"
           alt="Profile Photo"
           class="rounded-circle shadow avatar-img"
         />
       </div>
       <div class="col-md-8">
-        <h2 class="display-6 text-highlight mb-4">{{ workshop.fullName }}</h2>
+        <h2 class="display-6 text-highlight mb-4">{{ workshop.name }}</h2>
         <p><strong>Email:</strong> {{ workshop.email }}</p>
         <p><strong>Phone:</strong> {{ workshop.phone }}</p>
         <p><strong>Address:</strong> {{ workshop.address }}</p>
@@ -22,6 +22,7 @@
         <p *ngIf="workshop.description"><strong>Description:</strong> {{ workshop.description }}</p>
       </div>
     </div>
+
     <section *ngIf="workshop.registrationDocuments" class="document-section mt-4">
       <h2 class="section-title">Registration Documents</h2>
       <div class="row">
@@ -41,162 +42,147 @@
   </div>
 
   <!-- Workshop Edit Form -->
-  <div class="container mt-5 text-white">
-    <!-- Workshop Edit Form -->
-    <div *ngIf="editMode" class="card bg-custom p-4 shadow-lg">
-      <form (ngSubmit)="saveWorkshop()" #workshopForm="ngForm">
-        <div class="row">
-          <div class="col-md-4 text-center mb-3">
-            <img
-              [src]="workshop.personalPhoto || 'https://via.placeholder.com/150'"
-              alt="Profile Photo"
-              class="rounded-circle shadow avatar-img"
-            />
+  <div *ngIf="editMode" class="card bg-custom p-4 shadow-lg">
+    <form (ngSubmit)="saveWorkshop()" #workshopForm="ngForm">
+      <div class="row">
+        <div class="col-md-4 text-center mb-3">
+          <img
+            [src]="workshop.photo || 'https://via.placeholder.com/150'"
+            alt="Profile Photo"
+            class="rounded-circle shadow avatar-img"
+          />
+          <input
+            type="file"
+            class="form-control mt-3 bg-input"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+          />
+        </div>
+
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="fullName" class="form-label text-highlight">Full Name</label>
+              <input
+                id="fullName"
+                type="text"
+                name="fullName"
+                [(ngModel)]="workshopTemp.name"
+                required
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label text-highlight">Email</label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                [(ngModel)]="workshopTemp.email"
+                required
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="phone" class="form-label text-highlight">Phone</label>
+              <input
+                id="phone"
+                type="text"
+                name="phone"
+                [(ngModel)]="workshopTemp.phone"
+                required
+                pattern="^(010|011|012|015)[0-9]{8}$"
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="address" class="form-label text-highlight">Address</label>
+              <input
+                id="address"
+                type="text"
+                name="address"
+                [(ngModel)]="workshopTemp.address"
+                required
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label text-highlight">Role</label>
             <input
-              type="file"
-              class="form-control mt-3 bg-input"
-              (change)="onFileSelected($event)"
-              accept="image/*"
+              id="role"
+              type="text"
+              name="role"
+              [(ngModel)]="workshopTemp.role"
+              required
+              class="form-control form-control-lg bg-input"
             />
           </div>
-          <div class="col-md-8">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="fullName" class="form-label text-highlight">Full Name</label>
-                <input
-                  id="fullName"
-                  type="text"
-                  name="fullName"
-                  [(ngModel)]="workshop.fullName"
-                  required
-                  minlength="2"
-                  maxlength="100"
-                  class="form-control form-control-lg bg-input"
-                  [class.is-invalid]="workshopForm.submitted && !workshop.fullName"
-                />
-                <div *ngIf="workshopForm.submitted && !workshop.fullName" class="invalid-feedback">
-                  Full name is required.
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="email" class="form-label text-highlight">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  name="email"
-                  [(ngModel)]="workshop.email"
-                  required
-                  class="form-control form-control-lg bg-input"
-                  [class.is-invalid]="workshopForm.submitted && !workshop.email"
-                />
-                <div *ngIf="workshopForm.submitted && !workshop.email" class="invalid-feedback">
-                  A valid email is required.
-                </div>
-              </div>
-            </div>
 
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="phone" class="form-label text-highlight">Phone</label>
-                <input
-                  id="phone"
-                  type="text"
-                  name="phone"
-                  [(ngModel)]="workshop.phone"
-                  required
-                  pattern="^(010|011|012|015)[0-9]{8}$"
-                  class="form-control form-control-lg bg-input"
-                  [class.is-invalid]="workshopForm.submitted && !workshop.phone"
-                />
-                <div *ngIf="workshopForm.submitted && !workshop.phone" class="invalid-feedback">
-                  Valid Egyptian phone number is required. Example: 010xxxxxxxx.
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label for="address" class="form-label text-highlight">Address</label>
-                <input
-                  id="address"
-                  type="text"
-                  name="address"
-                  [(ngModel)]="workshop.address"
-                  required
-                  minlength="5"
-                  class="form-control form-control-lg bg-input"
-                  [class.is-invalid]="workshopForm.submitted && !workshop.address"
-                />
-                <div *ngIf="workshopForm.submitted && !workshop.address" class="invalid-feedback">
-                  Address is required.
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="password" class="form-label text-highlight">New Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  name="password"
-                  [(ngModel)]="workshop.password"
-                  #password="ngModel"
-                  minlength="8"
-                  class="form-control form-control-lg bg-input"
-                  [class.is-invalid]="password.invalid && (password.dirty || password.touched)"
-                />
-                <div *ngIf="password.invalid && (password.dirty || password.touched)" class="invalid-feedback">
-                  <div *ngIf="password.errors?.['minlength']">Password must be at least 8 characters long.</div>
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="confirmPassword" class="form-label text-highlight">Confirm Password</label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  name="confirmPassword"
-                  [(ngModel)]="workshop.confirmPassword"
-                  #confirmPassword="ngModel"
-                  [class.is-invalid]="confirmPassword.invalid && (confirmPassword.dirty || confirmPassword.touched) || workshop.password !== workshop.confirmPassword"
-                  class="form-control form-control-lg bg-input"
-                />
-                <div *ngIf="workshop.password !== workshop.confirmPassword" class="invalid-feedback">
-                  Passwords do not match.
-                </div>
-              </div>
-            </div>
-
-            <!-- Add description field -->
-            <div class="mb-3">
-              <label for="description" class="form-label text-highlight">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                [(ngModel)]="workshop.description"
-                rows="4"
-                class="form-control bg-input"
-                maxlength="500"
-                [class.is-invalid]="workshopForm.submitted && workshop.description.length > 500"
-              ></textarea>
-              <div *ngIf="workshopForm.submitted && workshop.description.length > 500" class="invalid-feedback">
-                Description cannot exceed 500 characters.
-              </div>
-            </div>
-
+          <div class="mb-3">
+            <label for="balance" class="form-label text-highlight">Balance</label>
+            <input
+              id="balance"
+              type="number"
+              name="balance"
+              [(ngModel)]="workshopTemp.balance"
+              required
+              class="form-control form-control-lg bg-input"
+              min="0"
+            />
           </div>
-        </div>
 
-        <div class="d-flex justify-content-end">
-          <button
-            type="button"
-            class="btn btn-outline-light btn-lg me-3 px-4"
-            (click)="toggleEditMode()"
-          >
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-light btn-lg px-4" [disabled]="!workshopForm.form.valid">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
+          <div class="mb-3">
+            <label for="registerStatus" class="form-label text-highlight">Register Status</label>
+            <input
+              id="registerStatus"
+              type="text"
+              name="registerStatus"
+              [(ngModel)]="workshopTemp.registerStatus"
+              required
+              class="form-control form-control-lg bg-input"
+            />
+          </div>
 
+          <div class="mb-3">
+            <label for="ordersSold" class="form-label text-highlight">Orders Sold</label>
+            <input
+              id="ordersSold"
+              type="number"
+              name="ordersSold"
+              [(ngModel)]="workshopTemp.ordersSold"
+              required
+              class="form-control form-control-lg bg-input"
+              min="0"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label text-highlight">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              [(ngModel)]="workshopTemp.description"
+              class="form-control bg-input"
+            ></textarea>
+          </div>
+<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3 ">
+  <button type="submit" class="btn btn-light btn-lg px-4 mt-3" [disabled]="!workshopForm.form.valid ">Save</button>
+  <button type="button" class="btn btn-outline-secondary btn-lg px-4 mt-3" (click)="toggleEditMode()">Cancel</button>
 </div>
+
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
