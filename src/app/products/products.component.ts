@@ -1,17 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { FormsModule } from '@angular/forms';
+import { FormsModule , NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTrash, faMinus, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons';
-
 import { ProductsService } from '../services/products.service'; 
 import { Product } from '../services/products.service'; 
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, FontAwesomeModule],
+  imports: [CommonModule,FontAwesomeModule,FormsModule],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css'],
 })
@@ -31,6 +30,8 @@ export class ProductsComponent implements OnInit {
   filePreview: { [key: string]: string } = {};
   isEditMode: boolean = false; 
   Object = Object;
+  submitted: boolean = false; // Flag for form submission
+  
   constructor(private modalService: NgbModal, private productsService: ProductsService) {}
 
   ngOnInit() {
@@ -65,7 +66,79 @@ export class ProductsComponent implements OnInit {
     }
   }
   
-
+ 
+  
+  isNumber(event: KeyboardEvent): void {
+    const pattern = /^[0-9]*$/;
+    const inputChar = String.fromCharCode(event.charCode);
+    if (!pattern.test(inputChar)) {
+      event.preventDefault();
+    }
+  }
+  
+  saveProduct(form: NgForm) {
+    this.submitted = true; // Set form submitted flag
+  
+    if (form.valid && this.selectedProduct) {
+      const formData = new FormData();
+      formData.append('name', this.selectedProduct.name);
+      formData.append('nameInArabic', this.selectedProduct.nameInArabic);
+      formData.append('description', this.selectedProduct.description);
+      formData.append('descriptionInArabic', this.selectedProduct!.descriptionInArabic);
+      formData.append('price', String(this.selectedProduct.price));
+      formData.append('category', this.selectedProduct.category);
+      formData.append('quantity', String(this.selectedProduct.quantity));
+      
+      this.colorInputs.forEach((color) => {
+        formData.append('color', color);
+      });
+  
+      
+      if (this.selectedFiles.length === 0) {
+        if (this.isEditMode) {
+          
+          this.selectedProduct.images.forEach((image) => {
+            formData.append('images', image);
+          });
+        } else {
+          
+          this.showAlert('At least one image is required.', 'danger');
+          return; 
+        }
+      } else {
+        
+        this.selectedFiles.forEach((file) => {
+          formData.append('images', file, file.name);
+        });
+      }
+  
+      if (this.isEditMode) {
+        this.productsService.updateProduct(this.selectedProduct._id, formData).subscribe(
+          () => {
+            this.getProducts();
+            this.showAlert('Product updated successfully!', 'success');
+            this.modalService.dismissAll();
+          },
+          () => this.showAlert('Failed to update product.', 'danger')
+        );
+      } else {
+        this.productsService.addProduct(formData).subscribe(
+          () => {
+            this.getProducts();
+            this.showAlert('Product added successfully!', 'success');
+            this.modalService.dismissAll();
+          },
+          () => {
+            this.showAlert('Failed to add product.', 'danger');
+            this.modalService.dismissAll();
+          }
+        );
+      }
+    } else {
+      this.showAlert('Please fill out all required fields.', 'danger');
+    }
+  }
+  
  
   openModal(content: any, product: Product | null = null) {
     if (product) {
@@ -111,50 +184,7 @@ export class ProductsComponent implements OnInit {
         this.colorInputs.splice(index, 1); 
       }
 
-  saveProduct() {
-    if (this.selectedProduct) {
-      const formData = new FormData();
-      formData.append('name', this.selectedProduct.name);
-      formData.append('nameInArabic', this.selectedProduct!.nameInArabic);
-      formData.append('description', this.selectedProduct.description);
-      formData.append('descriptionInArabic', this.selectedProduct!.descriptionInArabic);
-      formData.append('price', String(this.selectedProduct.price));
-      formData.append('category', this.selectedProduct.category);
-      formData.append('quantity', String(this.selectedProduct.quantity));
-        this.colorInputs.forEach((color, index) => {
-          formData.append('color', color);
-        }); 
-              
-      this.selectedFiles.forEach((file, index) => {
-        formData.append('images', file, file.name);
-      });
-
-      if (this.isEditMode) {
-        
-        this.productsService.updateProduct(this.selectedProduct._id, formData).subscribe(
-          () => {
-            this.getProducts();
-            this.showAlert('Product updated successfully!', 'success');
-            this.modalService.dismissAll();
-          },
-          () => this.showAlert('Failed to update product.', 'danger')
-        );
-      } else {
-       
-      this.productsService.addProduct(formData).subscribe(
-        () => {
-          this.getProducts();
-          this.showAlert('Product added successfully!', 'success');
-          this.modalService.dismissAll();
-        },
-        () => {
-          this.showAlert('Failed to add product.', 'danger');
-          this.modalService.dismissAll();
-        }
-      );
-      }
-    }
-  }
+  
 
   
   openDeleteModal(content: any, productId: string) {
@@ -191,3 +221,9 @@ export class ProductsComponent implements OnInit {
   }
 }
 
+
+
+
+
+ 
+  
