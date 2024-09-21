@@ -2,19 +2,10 @@
 import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Chat ,Message } from '../models/IChat';
+import { ChatService } from '../services/chat.service';
 
-interface Chat {
-  name: string;
-  time: string;
-  messages: Message[];
-}
 
-interface Message {
-  text: string;
-  time: string;
-  imageUrl?: string;
-  sender: 'me' | 'other';
-}
 
 @Component({
   selector: 'app-chat',
@@ -24,29 +15,85 @@ interface Message {
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent {
-  chats: Chat[] = [
-    { name: 'Ahmed Joba 🦅', time: '09:24 PM', messages: [] },
-    { name: 'Ahmed Tarek ♥️👬', time: '09:24 PM', messages: [] },
-    { name: 'Youssef Makhlouf 💪👬', time: '09:24 PM', messages: [] },
-    { name: 'Tarek Ahmed  ♥️', time: '09:24 PM', messages: [] },
-    { name: 'nour', time: '09:24 PM', messages: [] },
-    { name: 'abdo', time: '09:24 PM', messages: [] },
-    { name: 'hend', time: '09:24 PM', messages: [] },
-  ];
-
+  chats: Chat[] = []
+lasestMessage: Message | null = null;
   filteredChats: Chat[] = [...this.chats];
   searchText = '';
-  selectedChat: Chat | null = null; // Initially, no chat is selected
-  messageText = '';
-
+  selectedChat:Chat | null = null; // Initially, no chat is selected
+  content = '';
+// userId: string | null = '';
+messages: Message[] = [];
   modalImage: string | null = null;
   isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
   screenWidth: number;
-
-  constructor() {
+userId=localStorage.getItem('userId')
+  constructor(private chatService: ChatService) {
     this.screenWidth = window.innerWidth; // Initialize the screen width
   }
+  ngOnInit(): void {
+    
+    this.getChats()
+    // this.selectChat()
+  
+    
+  }
+  getUserIdFromToken(): string | null {
+    const token = localStorage.getItem('token');
+  
+    if (token) {
+      // JWT format is: header.payload.signature
+      const tokenParts = token.split('.');
+  
+      if (tokenParts.length === 3) {
+        // Decode the payload part (second part of the token)
+        const base64Url = tokenParts[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map((char) => {
+          return '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+  
+        // Parse the JSON payload to retrieve the userId
+        const payload = JSON.parse(jsonPayload);
+        console.log(payload.userId || payload.sub)
+        // Return the userId from the payload (assumed to be stored under 'userId' or 'sub')
+        return payload.userId || payload.sub;
 
+      }
+    }
+  
+    return null;
+  }
+  // getUserIdFromToken();
+  // localStorage.setItem('userId', this.userId);
+  setUserId(userId: string) {
+    this.getUserIdFromToken()
+    this.userId=this.getUserIdFromToken()||'';
+  
+  console.log(this.userId)
+  localStorage.setItem('userId', this.userId)
+  }
+  
+  getChats() {
+    // const userId=JSON.stringify(localStorage.getItem('userId'))
+    // console.log(userId,'userId')
+    this.chatService.setUserId()
+    this.chatService.getChat().subscribe((chat: any) => {
+      
+      this.chats = chat
+      console.log(this.chats)
+      //chat.map((chat: IChat) => ({
+       // [...chat]
+      // }))
+        // this.fullName: chat.users.find((user: any) => user.id !== this.userId)?.fullName,
+        // latestMessage: chat.latestMessage?.content||'photo',
+        // updatedAt: chat.updatedAt 
+        // // chat.users.find((user: any) => user.id !== this.userId)
+      },(error)=>console.log('Error fetching chats:'));
+      
+  
+      this.filteredChats = [...this.chats];
+  }
+ 
   // Listen to window resize events to update the screen width
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
@@ -64,28 +111,42 @@ export class ChatComponent {
   }
 
   filterChats() {
-    this.filteredChats = this.chats.filter((chat) =>
-      chat.name.toLowerCase().includes(this.searchText.toLowerCase())
+    this.filteredChats = this.chats.filter((chat) =>{}
+      // chat.name.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
 
   selectChat(chat: Chat) {
-    this.selectedChat = chat;
+     this.selectedChat = chat;
+     this.chatService.getSelectedChat(this.selectedChat._id).subscribe((data: Message[]) => {
+      this.messages = []; // Clear previous messages
+      
+      data.forEach((message: Message) => {
+        if (message.content) {
+          this.messages.push(message);
+        }
+        if (message.photo) {
+          this.messages.push(message);
+        }
+      });
+    });
+  
     if (this.isMobile()) {
       this.isSidebarVisible = false; // Auto-hide the sidebar on mobile when a chat is selected
     }
+
   }
 
   sendMessage() {
-    if (this.messageText.trim() && this.selectedChat) {
-      const newMessage: Message = {
-        text: this.messageText,
-        time: new Date().toLocaleTimeString(),
-        sender: 'me',
-      };
-      this.selectedChat.messages.push(newMessage);
-      this.selectedChat.time = newMessage.time;
-      this.messageText = '';
+    if (this.content.trim() && this.selectedChat) {
+      // const newMessage: Message = {
+      //   content: this.content,
+      //   time: new Date().toLocaleTimeString(),
+      //   sender: 'me',
+      // };
+      // this.selectedChat.messages.push(newMessage);
+      // this.selectedChat.time = newMessage.time;
+      this.content = '';
       setTimeout(() => this.scrollToBottom(), 0);
     }
   }
@@ -110,13 +171,13 @@ export class ChatComponent {
       const reader = new FileReader();
       reader.onload = () => {
         if (this.selectedChat) {
-          this.selectedChat.messages.push({
-            text: '',
-            time: new Date().toLocaleTimeString(),
-            imageUrl: reader.result as string,
-            sender: 'me',
-          });
-          this.selectedChat.time = new Date().toLocaleTimeString();
+          // this.selectedChat.messages.push({
+          //   text: '',
+          //   time: new Date().toLocaleTimeString(),
+          //   imageUrl: reader.result as string,
+          //   sender: 'me',
+          // });
+          // this.selectedChat.time = new Date().toLocaleTimeString();
           setTimeout(() => this.scrollToBottom(), 0);
         }
       };

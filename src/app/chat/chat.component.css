@@ -1,6 +1,7 @@
 /* Global settings */
 * {
   scrollbar-width: none; /* For Firefox */
+ 
 }
 
 ::-webkit-scrollbar {
@@ -187,7 +188,7 @@
     .sidebar {
       order: 2;
       height: calc(100vh - 80px);
-
+     
     }
 
     .col-md-8 {
