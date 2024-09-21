@@ -1,16 +1,19 @@
-import { Component } from '@angular/core';
+
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface Chat {
   name: string;
   time: string;
+  messages: Message[];
 }
 
 interface Message {
   text: string;
   time: string;
   imageUrl?: string;
+  sender: 'me' | 'other';
 }
 
 @Component({
@@ -22,57 +25,74 @@ interface Message {
 })
 export class ChatComponent {
   chats: Chat[] = [
-    { name: 'Ahmed Joba 🦅', time: '09:24 PM' },
-    { name: 'Ahmed Tarek ♥️👬', time: '09:24 PM' },
-    { name: 'Youssef Makhlouf 💪👬', time: '09:24 PM' },
-    { name: 'Tarek Ahmed  ♥️', time: '09:24 PM' },
-    { name: 'nour', time: '09:24 PM' },
-    { name: 'abdo', time: '09:24 PM' },
-    { name: 'hend', time: '09:24 PM' },
+    { name: 'Ahmed Joba 🦅', time: '09:24 PM', messages: [] },
+    { name: 'Ahmed Tarek ♥️👬', time: '09:24 PM', messages: [] },
+    { name: 'Youssef Makhlouf 💪👬', time: '09:24 PM', messages: [] },
+    { name: 'Tarek Ahmed  ♥️', time: '09:24 PM', messages: [] },
+    { name: 'nour', time: '09:24 PM', messages: [] },
+    { name: 'abdo', time: '09:24 PM', messages: [] },
+    { name: 'hend', time: '09:24 PM', messages: [] },
   ];
 
   filteredChats: Chat[] = [...this.chats];
   searchText = '';
-  messages: Message[] = [];
-  selectedChat: Chat | null = this.chats[0];
+  selectedChat: Chat | null = null; // Initially, no chat is selected
   messageText = '';
+  showFullText: boolean = false;
 
-  modalImage: string | null = null; // لإدارة النافذة المنبثقة للصور
+  modalImage: string | null = null;
+  isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
+  screenWidth: number;
 
-  // تصفية الدردشات
+  constructor() {
+    this.screenWidth = window.innerWidth; // Initialize the screen width
+  }
+
+  // Listen to window resize events to update the screen width
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    this.screenWidth = window.innerWidth;
+  }
+
+  // Method to check if the screen size is mobile (below 768px)
+  isMobile(): boolean {
+    return this.screenWidth < 768;
+  }
+  toggleText() {
+    this.showFullText = !this.showFullText;
+  }
+  // Toggle sidebar visibility on small screens
+  toggleSidebar() {
+    this.isSidebarVisible = !this.isSidebarVisible;
+  }
+
   filterChats() {
     this.filteredChats = this.chats.filter((chat) =>
       chat.name.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
 
-  // اختيار الدردشة
   selectChat(chat: Chat) {
     this.selectedChat = chat;
+    if (this.isMobile()) {
+      this.isSidebarVisible = false; // Auto-hide the sidebar on mobile when a chat is selected
+    }
   }
 
-  // إرسال الرسائل
   sendMessage() {
-    if (this.messageText.trim()) {
+    if (this.messageText.trim() && this.selectedChat) {
       const newMessage: Message = {
         text: this.messageText,
         time: new Date().toLocaleTimeString(),
+        sender: 'me',
       };
-      this.messages.push(newMessage);
-
-      // تحديث الوقت في الـ Sidebar
-      if (this.selectedChat) {
-        this.selectedChat.time = newMessage.time;
-      }
-
+      this.selectedChat.messages.push(newMessage);
+      this.selectedChat.time = newMessage.time;
       this.messageText = '';
-
-      // التمرير التلقائي عند إضافة رسالة جديدة
       setTimeout(() => this.scrollToBottom(), 0);
     }
   }
 
-  // التمرير التلقائي لأسفل
   scrollToBottom() {
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
@@ -80,7 +100,6 @@ export class ChatComponent {
     }
   }
 
-  // فتح نافذة رفع الملفات
   triggerFileUpload() {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
@@ -88,42 +107,36 @@ export class ChatComponent {
     }
   }
 
-  // التعامل مع الملف المرفوع
   handleFileInput(event: any) {
     const file: File = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => {
-        this.messages.push({
-          text: '',
-          time: new Date().toLocaleTimeString(),
-          imageUrl: reader.result as string,
-        });
-
-        // تحديث الوقت في الـ Sidebar عند إرسال صورة
         if (this.selectedChat) {
+          this.selectedChat.messages.push({
+            text: '',
+            time: new Date().toLocaleTimeString(),
+            imageUrl: reader.result as string,
+            sender: 'me',
+          });
           this.selectedChat.time = new Date().toLocaleTimeString();
+          setTimeout(() => this.scrollToBottom(), 0);
         }
-
-        setTimeout(() => this.scrollToBottom(), 0); // التمرير التلقائي بعد إضافة الصورة
       };
       reader.readAsDataURL(file);
     }
   }
 
-  // إضافة خاصية الإرسال عند الضغط على Enter
   onEnterPress(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       this.sendMessage();
     }
   }
 
-  // فتح النافذة المنبثقة للصورة
   openImageModal(imageUrl: string) {
     this.modalImage = imageUrl;
   }
 
-  // غلق النافذة المنبثقة للصورة
   closeImageModal() {
     this.modalImage = null;
   }

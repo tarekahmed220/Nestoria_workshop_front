@@ -1,93 +1,81 @@
-<div class="container-fluid vh-100">
-  <div class="row p-3 h-75">
-    <!-- Sidebar -->
-    <div class="col-3 bg-dark text-light p-0 sidebar">
-      <div class="d-flex align-items-center p-3">
-        <input
-          type="text"
-          class="form-control"
-          [(ngModel)]="searchText"
-          (input)="filterChats()"
-          placeholder="Search..."
-        />
+<div class="container-fluid vh-100 d-flex flex-column">
+  <div class="row flex-grow-1 overflow-hidden">
+    <!-- Sidebar / Chat List -->
+    <div class="col-12 col-md-4 col-lg-3 bg-dark-custom text-light p-0 d-flex flex-column sidebar"
+      [class.d-none]="!isSidebarVisible && isMobile()">
+      <div class="p-3 bg-header-custom">
+        <input type="text" class="form-control " [(ngModel)]="searchText" (input)="filterChats()"
+          placeholder="Search..." />
       </div>
 
-      <ul class="list-group">
+      <!-- Chat List -->
+      <ul class="list-group flex-grow-1 overflow-auto list-group-flush">
         @for (chat of filteredChats; track $index) {
         <li
-          class="list-group-item d-flex justify-content-between align-items-center"
-          [class.active]="chat === selectedChat"
-          (click)="selectChat(chat)"
-        >
-          <div class="chat-info">
-            <i class="fa fa-user-circle me-1" style="font-size: 20px"></i>
+          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark-custom text-light border-0"
+          [class.active]="chat === selectedChat" (click)="selectChat(chat)">
+          <div class="d-flex align-items-center">
+            <i class="fa fa-user-circle me-2" style="font-size: 20px"></i>
             <span>{{ chat.name }}</span>
           </div>
-          <span class="badge badge-pill bg-success chat-time">{{
-            chat.time
-          }}</span>
+          <span class="badge bg-warning-custom">{{ chat.time }}</span>
         </li>
         }
       </ul>
     </div>
 
     <!-- Chat Area -->
-    <div class="col-9 bg-light d-flex flex-column p-0">
+    <div class="col-12 col-md-8 col-lg-9 d-flex flex-column p-0 " [class.d-none]="isSidebarVisible && isMobile()">
+      <!-- Toggle Sidebar Button on Mobile -->
+
+
       <!-- Chat Header -->
-      <div class="bg-dark text-light p-3 d-flex align-items-center">
-        <i class="fa fa-user-circle" style="font-size: 36px"></i>
-        <span class="ms-3">{{ selectedChat?.name }}</span>
+      <div class="bg-header-custom text-light p-2 d-flex align-items-center justify-content-between"
+        *ngIf="selectedChat">
+        <div class="d-flex align-items-center ">
+          <i class="fa fa-user-circle me-2" style="font-size: 36px"></i>
+          <span class="h4 ">{{ selectedChat.name }}</span>
+        </div>
+        <div *ngIf="!isSidebarVisible && isMobile()"
+          class="d-md-none bg-header-custom text-light d-flex justify-content-between align-items-center ">
+          <button class="btn btn-warning-custom" (click)="toggleSidebar()">☰</button>
+        </div>
       </div>
 
       <!-- Chat Messages -->
-      <div
-        class="flex-grow-1 p-3 overflow-auto chat-messages"
-        id="chatMessages"
-      >
-        @for (message of messages; track $index) {
-        <div>
-          <div class="p-2 mb-2 message-box">
+      <div class="flex-grow-1 p-3  overflow-auto chat-messages " *ngIf="selectedChat">
+        @for (message of selectedChat.messages; track $index) {
+        <div class="mb-2">
+          <div class="p-2 rounded shadow-sm bg-white text-black d-inline-block mb-2">
             @if (message.imageUrl) {
-            <img
-              [src]="message.imageUrl"
-              alt="Uploaded Image"
-              class="uploaded-image"
-              (click)="openImageModal(message.imageUrl)"
-            />
+              <img [src]="message.imageUrl" alt="Uploaded Image" class="img-fluid mb-2"
+                (click)="openImageModal(message.imageUrl)" />
             }
 
-            <!-- عرض النص إذا كان موجودًا -->
             @if (message.text) {
-            <p class="m-0">{{ message.text }}</p>
+              <p class="m-0" [class.truncated]="!showFullText">{{ showFullText ? message.text : (message.text | slice:0:100) + '...' }}</p>
+              <button *ngIf="message.text.length > 100" (click)="toggleText()" class="btn btn-link p-0">read more</button>
             }
+
             <small class="text-muted">{{ message.time }}</small>
           </div>
+
+
         </div>
         }
       </div>
 
       <!-- Message Input -->
-      <div class="d-flex p-3 bg-dark text-light align-items-center">
-        <input
-          type="text"
-          class="form-control me-2"
-          [(ngModel)]="messageText"
-          (keydown)="onEnterPress($event)"
-          placeholder="Type a message..."
-        />
-        <button class="btn btn-primary me-2" (click)="sendMessage()">
+      <div class="bg-white p-3 border-top d-flex align-items-center justify-content-between" *ngIf="selectedChat">
+        <input type="text" class="form-control me-2" [(ngModel)]="messageText" (keydown)="onEnterPress($event)"
+          placeholder="Type a message..." />
+        <button class="btn btn-warning-custom me-2" (click)="sendMessage()">
           <i class="fa fa-paper-plane"></i>
         </button>
 
-        <!-- Hidden file input for file upload -->
-        <input
-          type="file"
-          id="fileInput"
-          (change)="handleFileInput($event)"
-          hidden
-        />
-
-        <button class="btn btn-secondary" (click)="triggerFileUpload()">
+        <!-- File Upload -->
+        <input type="file" id="fileInput" (change)="handleFileInput($event)" hidden />
+        <button class="btn btn-warning-custom" (click)="triggerFileUpload()">
           <i class="fa fa-paperclip"></i>
         </button>
       </div>
@@ -95,10 +83,14 @@
   </div>
 </div>
 
-<!-- Image Modal for enlarged image with Close Button -->
+<!-- Image Modal -->
 @if (modalImage) {
-<div class="image-modal">
-  <span class="close-modal" (click)="closeImageModal()">X</span>
-  <img [src]="modalImage" class="enlarged-image" alt="Enlarged Image" />
+<div class="modal fade show d-flex justify-content-center align-items-center bg-dark bg-opacity-75"
+  style="z-index: 1050; display: block;">
+  <span class="close-modal position-absolute text-light" (click)="closeImageModal()"
+    style="top: 10px; right: 20px; font-size: 30px; cursor: pointer;">&times;</span>
+  <img [src]="modalImage" class="img-fluid" alt="Enlarged Image" />
 </div>
 }
+
+
