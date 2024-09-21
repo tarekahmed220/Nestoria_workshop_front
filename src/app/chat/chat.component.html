@@ -51,15 +51,11 @@
               <img [src]="message.imageUrl" alt="Uploaded Image" class="img-fluid mb-2"
                 (click)="openImageModal(message.imageUrl)" />
             }
-
             @if (message.text) {
-              <p class="m-0" [class.truncated]="!showFullText">{{ showFullText ? message.text : (message.text | slice:0:100) + '...' }}</p>
-              <button *ngIf="message.text.length > 100" (click)="toggleText()" class="btn btn-link p-0">read more</button>
+              <p class="m-0">{{ message.text }}</p>
             }
-
             <small class="text-muted">{{ message.time }}</small>
           </div>
-
 
         </div>
         }

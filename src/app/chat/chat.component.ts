@@ -38,7 +38,6 @@ export class ChatComponent {
   searchText = '';
   selectedChat: Chat | null = null; // Initially, no chat is selected
   messageText = '';
-  showFullText: boolean = false;
 
   modalImage: string | null = null;
   isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
@@ -58,9 +57,7 @@ export class ChatComponent {
   isMobile(): boolean {
     return this.screenWidth < 768;
   }
-  toggleText() {
-    this.showFullText = !this.showFullText;
-  }
+
   // Toggle sidebar visibility on small screens
   toggleSidebar() {
     this.isSidebarVisible = !this.isSidebarVisible;
