@@ -134,7 +134,8 @@ export class WorkshopProfileComponent implements OnInit {
     { key: 'bankStatement', name: 'Bank Statement' },
     { key: 'commercialRecord', name: 'Commercial Record' },
     { key: 'nationalIDFront', name: 'National ID Front' },
-    { key: 'nationalIDBack', name: 'National ID Back' }
+    { key: 'nationalIDBack', name: 'National ID Back' },
+
   ];
 
   constructor(private profileService: ProfileService) {}
