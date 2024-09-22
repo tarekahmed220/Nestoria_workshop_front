@@ -84,48 +84,58 @@
         <div class="mb-3">
           <label for="productName" class="form-label">Product Name</label>
           <input [(ngModel)]="selectedProduct!.name" name="productName" type="text" id="productName" class="form-control" 
-            required minlength="3" maxlength="100" />
+            required minlength="3" maxlength="100" pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9\s]+$"/> 
           <div *ngIf="productForm.controls['productName']?.invalid && (productForm.controls['productName']?.touched || productForm.submitted)" class="text-danger">
             <div *ngIf="productForm.controls['productName']?.errors?.['required']">Product Name is required.</div>
             <div *ngIf="productForm.controls['productName']?.errors?.['minlength']">Product Name must be at least 3 characters long.</div>
             <div *ngIf="productForm.controls['productName']?.errors?.['maxlength']">Product Name cannot exceed 100 characters.</div>
+            <div *ngIf="productForm.controls['productName']?.errors?.['pattern']">Product Name must contain only English letters and cannot be numbers only.</div>
           </div>
         </div>
         <div class="mb-3">
           <label for="productNameArabic" class="form-label">Product Name in Arabic</label>
           <input [(ngModel)]="selectedProduct!.nameInArabic" name="productNameArabic" type="text" id="productNameArabic" class="form-control" 
-            required minlength="3" maxlength="100" />
+            required minlength="3" maxlength="100"  pattern="^(?=.*[\u0600-\u06FF])[\u0600-\u06FF0-9\s]+$"/>
           <div *ngIf="productForm.controls['productNameArabic']?.invalid && (productForm.controls['productNameArabic']?.touched || productForm.submitted)" class="text-danger">
             <div *ngIf="productForm.controls['productNameArabic']?.errors?.['required']">Product Name in Arabic is required.</div>
             <div *ngIf="productForm.controls['productNameArabic']?.errors?.['minlength']">Product Name in Arabic must be at least 3 characters long.</div>
             <div *ngIf="productForm.controls['productNameArabic']?.errors?.['maxlength']">Product Name in Arabic cannot exceed 100 characters.</div>
+            <div *ngIf="productForm.controls['productNameArabic']?.errors?.['pattern']">Product Name in Arabic must contain at least one Arabic letter. English letters are not allowed, and it cannot be only numbers.</div>
           </div>
         </div>
         <div class="mb-3">
           <label for="productDescription" class="form-label">Product Description</label>
           <textarea [(ngModel)]="selectedProduct!.description" name="productDescription" id="productDescription" class="form-control" 
-            required minlength="3"></textarea>
+            required minlength="3" maxlength="1000" pattern="^(?=.*[a-zA-Z])[a-zA-Z0-9\s]+$"></textarea>
           <div *ngIf="productForm.controls['productDescription']?.invalid && (productForm.controls['productDescription']?.touched || productForm.submitted)" class="text-danger">
             <div *ngIf="productForm.controls['productDescription']?.errors?.['required']">Product Description is required.</div>
             <div *ngIf="productForm.controls['productDescription']?.errors?.['minlength']">Product Description must be at least 3 characters long.</div>
+            <div *ngIf="productForm.controls['productDescription']?.errors?.['maxlength']">Product Description cannot exceed 100 characters .</div>
+            <div *ngIf="productForm.controls['productDescription']?.errors?.['pattern']">Product Description must contain only English letters and cannot be numbers only.</div>
           </div>
         </div>
         <div class="mb-3">
           <label for="productDescriptionArabic" class="form-label">Product Description in Arabic</label>
           <textarea [(ngModel)]="selectedProduct!.descriptionInArabic" name="productDescriptionArabic" id="productDescriptionArabic" class="form-control" 
-            required minlength="3"></textarea>
+            required minlength="3" maxlength="1000" pattern="^(?=.*[\u0600-\u06FF])[\u0600-\u06FF0-9\s]+$"></textarea>
           <div *ngIf="productForm.controls['productDescriptionArabic']?.invalid && (productForm.controls['productDescriptionArabic']?.touched || productForm.submitted)" class="text-danger">
             <div *ngIf="productForm.controls['productDescriptionArabic']?.errors?.['required']">Product Description in Arabic is required.</div>
             <div *ngIf="productForm.controls['productDescriptionArabic']?.errors?.['minlength']">Product Description in Arabic must be at least 3 characters long.</div>
+            <div *ngIf="productForm.controls['productDescriptionArabic']?.errors?.['maxlength']">Product Description in Arabic cannot exceed 100 characters .</div>
+            <div *ngIf="productForm.controls['productDescriptionArabic']?.errors?.['pattern']">Product Description in Arabic must contain at least one Arabic letter. English letters are not allowed, and it cannot be only numbers.</div>
           </div>
         </div>
         <div class="mb-3">
           <label for="productPrice" class="form-label">Product Price</label>
           <input [(ngModel)]="selectedProduct!.price" name="productPrice" type="number" id="productPrice" class="form-control" 
-            required min="0" (keypress)="isNumber($event)" />
+            required min="1" max="1000000000000" (keypress)="isNumber($event)" />
           <div *ngIf="productForm.controls['productPrice']?.invalid && (productForm.controls['productPrice']?.touched || productForm.submitted)" class="text-danger">
             <div *ngIf="productForm.controls['productPrice']?.errors?.['required']">Product Price is required.</div>
             <div *ngIf="productForm.controls['productPrice']?.errors?.['min']">Product Price must be a positive number.</div>
+            <div *ngIf="productForm.controls['productPrice']?.errors?.['max']">
+              Product Price must be less than or equal to 1,000,000,000,000.
+            </div>
+            
           </div>
         </div>
         <div class="mb-3">
@@ -141,10 +151,13 @@
         <div class="mb-3">
           <label for="productQuantity" class="form-label">Product Quantity</label>
           <input [(ngModel)]="selectedProduct!.quantity" name="productQuantity" type="number" id="productQuantity" class="form-control" 
-            required min="1" (keypress)="isNumber($event)" />
+            required min="1" max="100000000000000" (keypress)="isNumber($event)" />
           <div *ngIf="productForm.controls['productQuantity']?.invalid && (productForm.controls['productQuantity']?.touched || productForm.submitted)" class="text-danger">
             <div *ngIf="productForm.controls['productQuantity']?.errors?.['required']">Product Quantity is required.</div>
             <div *ngIf="productForm.controls['productQuantity']?.errors?.['min']">Product Quantity must be at least 1.</div>
+            <div *ngIf="productForm.controls['productQuantity']?.errors?.['max']">
+              Product Quantity must be less than or equal to 1,000,000,000,000.
+            </div>
           </div>
         </div>
         <div class="mb-3">

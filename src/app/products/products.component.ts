@@ -162,7 +162,7 @@ export class ProductsComponent implements OnInit {
         nameInArabic: '',
         description: '', 
         descriptionInArabic: '',
-        price: 0, 
+        price: 1, 
         images: [], 
         color: [], 
         quantity: 1, 
