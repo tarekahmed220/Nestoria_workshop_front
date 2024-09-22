@@ -21,12 +21,12 @@ lasestMessage: Message | null = null;
   searchText = '';
   selectedChat:Chat | null = null; // Initially, no chat is selected
   content = '';
-// userId: string | null = '';
+ userId: string = JSON.stringify(localStorage.getItem('userId') ) ||""
 messages: Message[] = [];
   modalImage: string | null = null;
   isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
   screenWidth: number;
-userId=localStorage.getItem('userId')
+
   constructor(private chatService: ChatService) {
     this.screenWidth = window.innerWidth; // Initialize the screen width
   }
