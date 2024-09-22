@@ -18,14 +18,14 @@
             <i class="fa fa-user-circle me-2" style="font-size: 20px"></i>
            
           
-          @if(chat.users[0].id==userId){
+          @if(chat.users.length>1){
              <span class="badge color-white p-3 ms-2 ">{{ chat.users[1].fullName }}</span>}
           </div>
           <!-- @if (chat.latestMessage.content) { -->
             <!-- <span>{{ chat.latestMessage.content }}</span>} -->
             <!-- @else if (chat.latestMessage.photo) { -->
             <!-- <span>photo</span>} -->
-            <!-- @else {<span></span>}  -->
+            <!-- @else {<span></span>} -->
           <span class="badge bg-warning-custom">{{ chat.updatedAt| date : "shortTime" }}</span>
         </li>
         }
@@ -54,18 +54,19 @@
       <div class="flex-grow-1 p-3  overflow-auto chat-messages " *ngIf="selectedChat">
         @for (message of messages; track $index) {
         <div class="mb-2">
-          <div class="p-2 rounded shadow-sm bg-white text-black d-inline-block mb-2 color-black">
+          <div class=" rounded shadow-sm bg-white text-black d-flex flex-column mb-2 color-black ms-2 w-50 ">
             <!-- @if (message.updatedAt) {
              
                  <span class="fs-1 color-black">{{ message.updatedAt | date:"shortTime"}}</span>
             } -->
             @if (message.photo) {
-               <img [src]="message.photo" alt="Uploaded Image" class="img-fluid mb-2"
+               <img [src]="message.photo" alt="Uploaded Image" class="img-fluid mb-2 w-50 h-auto rounded"
                 (click)="openImageModal(message.photo)" />
              }
             @if (message.content) {
               <p class="m-2 fs-6 color-black">{{ message?.content }}</p>
             }
+            
             <small class="text-muted">{{  message.updatedAt | date:"shortTime"}}</small>
           </div>
 
@@ -91,6 +92,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Image Modal -->
 @if (modalImage) {
