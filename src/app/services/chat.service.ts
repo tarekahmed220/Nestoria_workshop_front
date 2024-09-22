@@ -17,7 +17,7 @@ export class ChatService {
   getSelectedChat(_id: string): Observable<[Message]> {
     return this.http.get<[Message]>(`${this.messageUrl}/${_id}`);
   }
-  sendMessage(messageData: FormData): Observable<any> {
+  sendMessage(messageData: { content: string; chatId: string }): Observable<any> {
     return this.http.post(`${this.messageUrl}`, messageData);
   }
   getUserIdFromToken(): string | null {

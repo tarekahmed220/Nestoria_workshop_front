@@ -77,17 +77,12 @@ userId=localStorage.getItem('userId')
     // const userId=JSON.stringify(localStorage.getItem('userId'))
     // console.log(userId,'userId')
     this.chatService.setUserId()
-    this.chatService.getChat().subscribe((chat: any) => {
+    this.chatService.getChat().subscribe((chat) => {
       
       this.chats = chat
       console.log(this.chats)
-      //chat.map((chat: IChat) => ({
-       // [...chat]
-      // }))
-        // this.fullName: chat.users.find((user: any) => user.id !== this.userId)?.fullName,
-        // latestMessage: chat.latestMessage?.content||'photo',
-        // updatedAt: chat.updatedAt 
-        // // chat.users.find((user: any) => user.id !== this.userId)
+      this.filteredChats = [...this.chats];
+
       },(error)=>console.log('Error fetching chats:'));
       
   
@@ -137,20 +132,32 @@ userId=localStorage.getItem('userId')
 
   }
 
+ 
   sendMessage() {
     if (this.content.trim() && this.selectedChat) {
-      // const newMessage: Message = {
-      //   content: this.content,
-      //   time: new Date().toLocaleTimeString(),
-      //   sender: 'me',
-      // };
-      // this.selectedChat.messages.push(newMessage);
-      // this.selectedChat.time = newMessage.time;
-      this.content = '';
-      setTimeout(() => this.scrollToBottom(), 0);
+      // Create FormData object and append the message content and chat ID
+      const messageData = {
+        content: this.content,
+        chatId: this.selectedChat._id
+      };
+      // Call the chat service to send the message as FormData
+      this.chatService.sendMessage(messageData).subscribe(
+        (response) => {
+          console.log('Message sent successfully:', response);
+          // Add the new message to the messages array (optional: depends on your API response)
+          this.messages.push(response);
+          // Clear the input field after sending the message
+          this.content = '';
+          // Scroll to the bottom after sending the message
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
+        (error) => {
+          console.error('Error sending message:', error);
+        }
+      );
     }
   }
-
+  
   scrollToBottom() {
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
