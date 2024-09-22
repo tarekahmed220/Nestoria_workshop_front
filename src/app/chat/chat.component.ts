@@ -1,17 +1,11 @@
-import { Component } from '@angular/core';
+
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Chat ,Message } from '../models/IChat';
+import { ChatService } from '../services/chat.service';
 
-interface Chat {
-  name: string;
-  time: string;
-}
 
-interface Message {
-  text: string;
-  time: string;
-  imageUrl?: string;
-}
 
 @Component({
   selector: 'app-chat',
@@ -21,58 +15,149 @@ interface Message {
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent {
-  chats: Chat[] = [
-    { name: 'Ahmed Joba 🦅', time: '09:24 PM' },
-    { name: 'Ahmed Tarek ♥️👬', time: '09:24 PM' },
-    { name: 'Youssef Makhlouf 💪👬', time: '09:24 PM' },
-    { name: 'Tarek Ahmed  ♥️', time: '09:24 PM' },
-    { name: 'nour', time: '09:24 PM' },
-    { name: 'abdo', time: '09:24 PM' },
-    { name: 'hend', time: '09:24 PM' },
-  ];
-
+  chats: Chat[] = []
+lasestMessage: Message | null = null;
   filteredChats: Chat[] = [...this.chats];
   searchText = '';
-  messages: Message[] = [];
-  selectedChat: Chat | null = this.chats[0];
-  messageText = '';
+  selectedChat:Chat | null = null; // Initially, no chat is selected
+  content = '';
+// userId: string | null = '';
+messages: Message[] = [];
+  modalImage: string | null = null;
+  isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
+  screenWidth: number;
+userId=localStorage.getItem('userId')
+  constructor(private chatService: ChatService) {
+    this.screenWidth = window.innerWidth; // Initialize the screen width
+  }
+  ngOnInit(): void {
+    
+    this.getChats()
+    // this.selectChat()
+  
+    
+  }
+  getUserIdFromToken(): string | null {
+    const token = localStorage.getItem('token');
+  
+    if (token) {
+      // JWT format is: header.payload.signature
+      const tokenParts = token.split('.');
+  
+      if (tokenParts.length === 3) {
+        // Decode the payload part (second part of the token)
+        const base64Url = tokenParts[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map((char) => {
+          return '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+  
+        // Parse the JSON payload to retrieve the userId
+        const payload = JSON.parse(jsonPayload);
+        console.log(payload.userId || payload.sub)
+        // Return the userId from the payload (assumed to be stored under 'userId' or 'sub')
+        return payload.userId || payload.sub;
 
-  modalImage: string | null = null; // لإدارة النافذة المنبثقة للصور
+      }
+    }
+  
+    return null;
+  }
+  // getUserIdFromToken();
+  // localStorage.setItem('userId', this.userId);
+  setUserId(userId: string) {
+    this.getUserIdFromToken()
+    this.userId=this.getUserIdFromToken()||'';
+  
+  console.log(this.userId)
+  localStorage.setItem('userId', this.userId)
+  }
+  
+  getChats() {
+    // const userId=JSON.stringify(localStorage.getItem('userId'))
+    // console.log(userId,'userId')
+    this.chatService.setUserId()
+    this.chatService.getChat().subscribe((chat) => {
+      
+      this.chats = chat
+      console.log(this.chats)
+      this.filteredChats = [...this.chats];
 
-  // تصفية الدردشات
+      },(error)=>console.log('Error fetching chats:'));
+      
+  
+      this.filteredChats = [...this.chats];
+  }
+ 
+  // Listen to window resize events to update the screen width
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    this.screenWidth = window.innerWidth;
+  }
+
+  // Method to check if the screen size is mobile (below 768px)
+  isMobile(): boolean {
+    return this.screenWidth < 768;
+  }
+
+  // Toggle sidebar visibility on small screens
+  toggleSidebar() {
+    this.isSidebarVisible = !this.isSidebarVisible;
+  }
+
   filterChats() {
-    this.filteredChats = this.chats.filter((chat) =>
-      chat.name.toLowerCase().includes(this.searchText.toLowerCase())
+    this.filteredChats = this.chats.filter((chat) =>{}
+      // chat.name.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
 
-  // اختيار الدردشة
   selectChat(chat: Chat) {
-    this.selectedChat = chat;
+     this.selectedChat = chat;
+     this.chatService.getSelectedChat(this.selectedChat._id).subscribe((data: Message[]) => {
+      this.messages = []; // Clear previous messages
+      
+      data.forEach((message: Message) => {
+        if (message.content) {
+          this.messages.push(message);
+        }
+        if (message.photo) {
+          this.messages.push(message);
+        }
+      });
+    });
+  
+    if (this.isMobile()) {
+      this.isSidebarVisible = false; // Auto-hide the sidebar on mobile when a chat is selected
+    }
+
   }
 
-  // إرسال الرسائل
+ 
   sendMessage() {
-    if (this.messageText.trim()) {
-      const newMessage: Message = {
-        text: this.messageText,
-        time: new Date().toLocaleTimeString(),
+    if (this.content.trim() && this.selectedChat) {
+      // Create FormData object and append the message content and chat ID
+      const messageData = {
+        content: this.content,
+        chatId: this.selectedChat._id
       };
-      this.messages.push(newMessage);
-
-      // تحديث الوقت في الـ Sidebar
-      if (this.selectedChat) {
-        this.selectedChat.time = newMessage.time;
-      }
-
-      this.messageText = '';
-
-      // التمرير التلقائي عند إضافة رسالة جديدة
-      setTimeout(() => this.scrollToBottom(), 0);
+      // Call the chat service to send the message as FormData
+      this.chatService.sendMessage(messageData).subscribe(
+        (response) => {
+          console.log('Message sent successfully:', response);
+          // Add the new message to the messages array (optional: depends on your API response)
+          this.messages.push(response);
+          // Clear the input field after sending the message
+          this.content = '';
+          // Scroll to the bottom after sending the message
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
+        (error) => {
+          console.error('Error sending message:', error);
+        }
+      );
     }
   }
-
-  // التمرير التلقائي لأسفل
+  
   scrollToBottom() {
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
@@ -80,7 +165,6 @@ export class ChatComponent {
     }
   }
 
-  // فتح نافذة رفع الملفات
   triggerFileUpload() {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
@@ -88,42 +172,41 @@ export class ChatComponent {
     }
   }
 
-  // التعامل مع الملف المرفوع
   handleFileInput(event: any) {
     const file: File = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.messages.push({
-          text: '',
-          time: new Date().toLocaleTimeString(),
-          imageUrl: reader.result as string,
-        });
-
-        // تحديث الوقت في الـ Sidebar عند إرسال صورة
-        if (this.selectedChat) {
-          this.selectedChat.time = new Date().toLocaleTimeString();
+    
+    if (file && this.selectedChat) {
+      const formData = new FormData();
+      formData.append('photo', file);  // Append the file
+      formData.append('chatId', this.selectedChat._id);  // Append the chat ID
+  
+      this.chatService.sendPhoto(formData).subscribe(
+        (response) => {
+          console.log('Photo sent successfully:', response);
+          this.messages.push(response);  // Optionally update the UI with the new message
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
+        (error) => {
+          console.log('Error sending photo:', error.error.message);
+          alert(error.error.message);
         }
-
-        setTimeout(() => this.scrollToBottom(), 0); // التمرير التلقائي بعد إضافة الصورة
-      };
-      reader.readAsDataURL(file);
+      );
+    }
+    else {
+      console.error('No file selected or no chat selected');
     }
   }
-
-  // إضافة خاصية الإرسال عند الضغط على Enter
+  
   onEnterPress(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       this.sendMessage();
     }
   }
 
-  // فتح النافذة المنبثقة للصورة
-  openImageModal(imageUrl: string) {
-    this.modalImage = imageUrl;
+  openImageModal(photo: string) {
+    this.modalImage = photo;
   }
 
-  // غلق النافذة المنبثقة للصورة
   closeImageModal() {
     this.modalImage = null;
   }

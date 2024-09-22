@@ -25,7 +25,12 @@ export class OrdersService {
   }
 
   getPendingOrders(): Observable<any> {
-    return this.http.get<any>(this.apiPendingOrders);
+    return this.http.get<any>(this.apiPendingOrders).pipe(
+      catchError((error) => {
+        console.error('Error fetching shipped orders:', error);
+        return throwError(error);
+      })
+    );
   }
 
   getShippedOrders(): Observable<any> {
@@ -37,12 +42,24 @@ export class OrdersService {
     );
   }
 
-  updateOrderStatus(productId: string, orderId: string): Observable<any> {
-    return this.http.put<any>(this.apiUpdateOrders, { productId, orderId });
+  updateOrderStatus(
+    productId: string,
+    orderId: string,
+    color: string
+  ): Observable<any> {
+    return this.http.put<any>(this.apiUpdateOrders, {
+      productId,
+      orderId,
+      color,
+    });
   }
 
-  cancelOrder(productId: string, orderId: string): Observable<any> {
-    const body = { productId, orderId };
+  cancelOrder(
+    productId: string,
+    orderId: string,
+    color: string
+  ): Observable<any> {
+    const body = { productId, orderId, color };
     return this.http.delete<any>(this.apiCancelOrders, { body });
   }
 }

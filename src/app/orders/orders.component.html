@@ -70,22 +70,17 @@
           <td>
             <!-- زر الشحن يظهر فقط في الطلبات غير المشحونة -->
             @if (!order.shipped) {
-            <button class="btn btn-success me-2" (click)="shipOrder(product.productId._id,product._id)">
+            <button
+              class="btn btn-success me-2"
+              (click)="shipOrder(product._id, order._id, product.color)"
+            >
               <i class="fas fa-shipping-fast"></i> Ship Order
             </button>
-            }
-
-            <!-- زر الإرسال يظهر بعد الشحن -->
-            @if (order.shipped && !order.sent) {
-            <button class="btn btn-primary me-2" (click)="sendOrder(order.id)">
-              <i class="fas fa-paper-plane"></i> Send Order
-            </button>
-            }
-
-            <!-- زر حذف الطلب يظهر إذا لم يتم الإرسال -->
-            @if (!order.sent) {
-            <button class="btn btn-danger" (click)="deleteOrder(product.productId._id,product._id)">
-              <i class="fas fa-trash"></i> Delete Order
+            <button
+              class="btn btn-danger"
+              (click)="cancelOrder(product._id, order._id, product.color,modalContent)"
+            >
+              <i class="fas fa-trash"></i> Canecl Order
             </button>
             }
           </td>
@@ -143,7 +138,12 @@
           </td>
           <td>{{ order.orderDate | date : "short" }}</td>
           <td>
-            <button class="btn btn-danger" (click)="cancelOrder(product.productId._id,product._id)">
+            <button
+              class="btn btn-danger"
+              (click)="
+                cancelOrder(product._id, order._id, product.color, modalContent)
+              "
+            >
               <i class="fas fa-times"></i> Cancel Order
             </button>
           </td>
@@ -153,4 +153,31 @@
     </table>
   </div>
   }
+  <div class="">
+    <!-- Modal content -->
+    <ng-template #modalContent let-modal>
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Cancellation</h5>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to cancel the order?</p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="modal.dismiss('Close click')"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="modal.close('confirm')"
+        >
+          Confirm
+        </button>
+      </div>
+    </ng-template>
+  </div>
 </div>
