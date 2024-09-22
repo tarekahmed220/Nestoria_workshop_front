@@ -162,11 +162,12 @@ export class ProductsComponent implements OnInit {
         nameInArabic: '',
         description: '',
         descriptionInArabic: '',
-        price: 0,
-        images: [],
-        color: [],
-        quantity: 1,
-        category: ''
+        price: 1, 
+        images: [], 
+        color: [], 
+        quantity: 1, 
+        category: '' 
+
       };
       this.colorInputs = [];
       this.selectedFiles = [];
