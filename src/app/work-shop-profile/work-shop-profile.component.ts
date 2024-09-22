@@ -1,20 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -96,6 +80,7 @@ export class WorkshopProfileComponent implements OnInit {
     formData.append('email', this.workshopTemp.email);
     formData.append('phone', this.workshopTemp.phone);
     formData.append('address', this.workshopTemp.address);
+    formData.append('description', this.workshopTemp.description);
 
     // Append file if available
     if (this.selectedFile) {
