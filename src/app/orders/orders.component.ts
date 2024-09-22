@@ -8,7 +8,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule,ConfirmComponent],
+  imports: [CommonModule, ConfirmComponent],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
 })
@@ -18,21 +18,23 @@ export class OrdersComponent implements OnInit {
   shippedOrders!: any;
   isClickDelete: boolean = false;
   isClickCancel: boolean = false;
+  modalContent: any;
 
-  constructor(private ordersServ: OrdersService, private modalService: NgbModal) {}
+  constructor(
+    private ordersServ: OrdersService,
+    private modalService: NgbModal
+  ) {}
 
-  getAllOrders(){
+  getAllOrders() {
     this.ordersServ.getAllOrders().subscribe((order) => {
       this.orders = order;
       // console.log(order);
     });
   }
-  getPendingOrders(){
+  getPendingOrders() {
     this.ordersServ.getPendingOrders().subscribe(
       (response) => {
-        if (
-          response.message === 'No pending orders found for this workshop'
-        ) {
+        if (response.message === 'No pending orders found for this workshop') {
           console.log(response.message);
           this.pendingOrders = [];
         } else {
@@ -45,12 +47,10 @@ export class OrdersComponent implements OnInit {
       }
     );
   }
-  getShippedOrders(){
+  getShippedOrders() {
     this.ordersServ.getShippedOrders().subscribe(
       (response) => {
-        if (
-          response.message === 'No shipped orders found for this workshop'
-        ) {
+        if (response.message === 'No shipped orders found for this workshop') {
           console.log(response.message);
           this.shippedOrders = [];
         } else {
@@ -67,7 +67,6 @@ export class OrdersComponent implements OnInit {
     this.getPendingOrders();
   }
 
-
   // قائمة الطلبات المشحونة
   // shippedOrders: Order[] = [];
 
@@ -79,7 +78,7 @@ export class OrdersComponent implements OnInit {
     this.activeTab = tab;
     if (tab === 'shipped') {
       this.getShippedOrders();
-    }else if(tab === 'pending'){
+    } else if (tab === 'pending') {
       this.getPendingOrders();
     }
   }
@@ -98,17 +97,24 @@ export class OrdersComponent implements OnInit {
   }
 
   sendOrder(id: string) {}
-  deleteOrder(productId: string, orderId: string, color: string) {
-    this.isClickDelete = true;
-      // this.modalService.open(content);
-    // console.log(productId, orderId);
-    this.ordersServ.cancelOrder(productId, orderId, color).subscribe(
-      (response) => {
-        console.log('Order canceled successfully:', response);
-        this.getPendingOrders();
+  deleteOrder(productId: string, orderId: string, color: string, content: any) {
+    const modalRef = this.modalService.open(content);
+    modalRef.result.then(
+      (result) => {
+        if (result === 'confirm') {
+          this.ordersServ.cancelOrder(productId, orderId, color).subscribe(
+            (response) => {
+              this.isClickCancel = true;
+              this.getPendingOrders();
+            },
+            (error) => {
+              console.error('Error cancel order:', error);
+            }
+          );
+        }
       },
-      (error) => {
-        console.error('Error cancel order:', error);
+      (reason) => {
+        console.log('Modal dismissed');
       }
     );
   }
@@ -129,7 +135,6 @@ export class OrdersComponent implements OnInit {
 
   cancelOrder(productId: string, orderId: string, color: string, content: any) {
     const modalRef = this.modalService.open(content);
-
     modalRef.result.then(
       (result) => {
         if (result === 'confirm') {

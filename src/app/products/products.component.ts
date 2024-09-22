@@ -4,8 +4,8 @@ import { FormsModule , NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTrash, faMinus, faPlus, faEdit } from '@fortawesome/free-solid-svg-icons';
-import { ProductsService } from '../services/products.service'; 
-import { Product } from '../services/products.service'; 
+import { ProductsService } from '../services/products.service';
+import { Product } from '../services/products.service';
 
 @Component({
   selector: 'app-products',
@@ -22,16 +22,16 @@ export class ProductsComponent implements OnInit {
   faEdit = faEdit;
   selectedProduct: Product | null = null;
   colorInputs: string[] = [];
-  
+
   availableCategory: string[] = [ "Sofa", "Outdoor Sofa", "Dining Table", "Coffee Table", "Bookshelf", "Bed Frame", "Desk", "Wardrobe", "Couch", "Bed", "Recliners", "Home Decoration", "Office Decoration", "Indoor Decoration", "Outdoor Decoration"];
   alertMessage: string | null = null;
   alertType: 'success' | 'danger' | 'warning' = 'success';
   selectedFiles: File[] = [];
   filePreview: { [key: string]: string } = {};
-  isEditMode: boolean = false; 
+  isEditMode: boolean = false;
   Object = Object;
   submitted: boolean = false; // Flag for form submission
-  
+
   constructor(private modalService: NgbModal, private productsService: ProductsService) {}
 
   ngOnInit() {
@@ -47,15 +47,15 @@ export class ProductsComponent implements OnInit {
     );
   }
 
-  
+
   onFileSelected(event: any) {
     if (event.target.files.length > 2) {
       this.showAlert('You can upload a maximum of 2 images.', 'warning');
     } else {
       this.selectedFiles = Array.from(event.target.files);
-      this.filePreview = {}; 
-      
-      
+      this.filePreview = {};
+
+
       for (const file of this.selectedFiles) {
         const reader = new FileReader();
         reader.onload = (e: any) => {
@@ -65,9 +65,9 @@ export class ProductsComponent implements OnInit {
       }
     }
   }
-  
- 
-  
+
+
+
   isNumber(event: KeyboardEvent): void {
     const pattern = /^[0-9]*$/;
     const inputChar = String.fromCharCode(event.charCode);
@@ -75,10 +75,10 @@ export class ProductsComponent implements OnInit {
       event.preventDefault();
     }
   }
-  
+
   saveProduct(form: NgForm) {
     this.submitted = true; // Set form submitted flag
-  
+
     if (form.valid && this.selectedProduct) {
       const formData = new FormData();
       formData.append('name', this.selectedProduct.name);
@@ -88,30 +88,30 @@ export class ProductsComponent implements OnInit {
       formData.append('price', String(this.selectedProduct.price));
       formData.append('category', this.selectedProduct.category);
       formData.append('quantity', String(this.selectedProduct.quantity));
-      
+
       this.colorInputs.forEach((color) => {
         formData.append('color', color);
       });
-  
-      
+
+
       if (this.selectedFiles.length === 0) {
         if (this.isEditMode) {
-          
+
           this.selectedProduct.images.forEach((image) => {
             formData.append('images', image);
           });
         } else {
-          
+
           this.showAlert('At least one image is required.', 'danger');
-          return; 
+          return;
         }
       } else {
-        
+
         this.selectedFiles.forEach((file) => {
           formData.append('images', file, file.name);
         });
       }
-  
+
       if (this.isEditMode) {
         this.productsService.updateProduct(this.selectedProduct._id, formData).subscribe(
           () => {
@@ -138,35 +138,35 @@ export class ProductsComponent implements OnInit {
       this.showAlert('Please fill out all required fields.', 'danger');
     }
   }
-  
- 
+
+
   openModal(content: any, product: Product | null = null) {
     if (product) {
       this.isEditMode = true;
-      this.selectedProduct = { ...product }; 
+      this.selectedProduct = { ...product };
       this.colorInputs = product.color || [];
-  
-      
-      this.selectedFiles = [];  
-      this.filePreview = {};   
-  
+
+
+      this.selectedFiles = [];
+      this.filePreview = {};
+
       product.images.forEach((imageUrl) => {
-        const fileName = imageUrl.split('/').pop(); 
-        this.filePreview[fileName || 'image'] = imageUrl; 
+        const fileName = imageUrl.split('/').pop();
+        this.filePreview[fileName || 'image'] = imageUrl;
       });
     } else {
       this.isEditMode = false;
       this.selectedProduct = {
-        _id: '', 
-        name: '', 
+        _id: '',
+        name: '',
         nameInArabic: '',
-        description: '', 
+        description: '',
         descriptionInArabic: '',
-        price: 0, 
-        images: [], 
-        color: [], 
-        quantity: 1, 
-        category: '' 
+        price: 0,
+        images: [],
+        color: [],
+        quantity: 1,
+        category: ''
       };
       this.colorInputs = [];
       this.selectedFiles = [];
@@ -174,19 +174,19 @@ export class ProductsComponent implements OnInit {
     }
     this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' });
   }
-  
-  
+
+
       addColor() {
-        this.colorInputs.push('#ffffff'); 
+        this.colorInputs.push('#ffffff');
       }
 
       removeColor(index: number) {
-        this.colorInputs.splice(index, 1); 
+        this.colorInputs.splice(index, 1);
       }
 
-  
 
-  
+
+
   openDeleteModal(content: any, productId: string) {
     this.modalService.open(content).result.then(
       (result) => {
@@ -195,7 +195,7 @@ export class ProductsComponent implements OnInit {
         }
       },
       (reason) => {
-        
+
       }
     );
   }
@@ -225,5 +225,4 @@ export class ProductsComponent implements OnInit {
 
 
 
- 
-  
+
