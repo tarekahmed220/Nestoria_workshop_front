@@ -16,10 +16,8 @@
         <p><strong>Address:</strong> {{ workshop.address }}</p>
         <p><strong>Role:</strong> {{ workshop.role }}</p>
         <p><strong>Balance:</strong> {{ workshop.balance | currency }}</p>
-        <p><strong>Register Status:</strong> {{ workshop.registerStatus }}</p>
         <p><strong>Orders Sold:</strong> {{ workshop.ordersSold }}</p>
-        <p><strong>Updated At:</strong> {{ workshop.updatedAt | date:'medium' }}</p>
-        <p *ngIf="workshop.description"><strong>Description:</strong> {{ workshop.description }}</p>
+        <p><strong>Description:</strong> {{ workshop.description }}</p>
       </div>
     </div>
 
