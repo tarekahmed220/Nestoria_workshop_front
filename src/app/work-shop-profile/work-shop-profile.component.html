@@ -4,7 +4,7 @@
     <div class="row align-items-center">
       <div class="col-md-4 text-center">
         <img
-          [src]="workshop.registrationDocuments['personalPhoto'] || 'https://via.placeholder.com/150'"
+          [src]="workshop.registrationDocuments.personalPhoto|| 'https://via.placeholder.com/150'"
           alt="Profile Photo"
           class="rounded-circle shadow avatar-img"
         />
@@ -23,20 +23,7 @@
       </div>
     </div>
 
-    <section *ngIf="workshop.registrationDocuments" class="document-section mt-4">
-      <h2 class="section-title">Registration Documents</h2>
-      <div class="row">
-        <div class="col-md-3" *ngFor="let doc of documentTypes">
-          <div class="card document-card mb-4">
-            <img [src]="workshop.registrationDocuments[doc.key]" class="card-img-top" alt="{{ doc.name }}" />
-            <div class="card-body">
-              <h5 class="card-title">{{ doc.name }}</h5>
-              <a [href]="workshop.registrationDocuments[doc.key]" target="_blank" class="btn btn-primary">View</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+
 
     <button class="btn btn-outline-light btn-lg px-4 mt-3" (click)="toggleEditMode()">Edit</button>
   </div>
@@ -47,7 +34,7 @@
       <div class="row">
         <div class="col-md-4 text-center mb-3">
           <img
-            [src]="workshop.registrationDocuments['personalPhoto']  || 'https://via.placeholder.com/150'"
+            [src]="workshop.registrationDocuments.personalPhoto  || 'https://via.placeholder.com/150'"
             alt="Profile Photo"
             class="rounded-circle shadow avatar-img"
           />
@@ -113,55 +100,9 @@
             </div>
           </div>
 
-          <div class="mb-3">
-            <label for="role" class="form-label text-highlight">Role</label>
-            <input
-              id="role"
-              type="text"
-              name="role"
-              [(ngModel)]="workshopTemp.role"
-              required
-              class="form-control form-control-lg bg-input"
-            />
-          </div>
 
-          <div class="mb-3">
-            <label for="balance" class="form-label text-highlight">Balance</label>
-            <input
-              id="balance"
-              type="number"
-              name="balance"
-              [(ngModel)]="workshopTemp.balance"
-              required
-              class="form-control form-control-lg bg-input"
-              min="0"
-            />
-          </div>
 
-          <div class="mb-3">
-            <label for="registerStatus" class="form-label text-highlight">Register Status</label>
-            <input
-              id="registerStatus"
-              type="text"
-              name="registerStatus"
-              [(ngModel)]="workshopTemp.registerStatus"
-              required
-              class="form-control form-control-lg bg-input"
-            />
-          </div>
 
-          <div class="mb-3">
-            <label for="ordersSold" class="form-label text-highlight">Orders Sold</label>
-            <input
-              id="ordersSold"
-              type="number"
-              name="ordersSold"
-              [(ngModel)]="workshopTemp.ordersSold"
-              required
-              class="form-control form-control-lg bg-input"
-              min="0"
-            />
-          </div>
 
           <div class="mb-3">
             <label for="description" class="form-label text-highlight">Description</label>
