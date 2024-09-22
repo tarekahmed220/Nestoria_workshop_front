@@ -18,7 +18,11 @@ export class ChatService {
     return this.http.get<[Message]>(`${this.messageUrl}/${_id}`);
   }
   sendMessage(messageData: { content: string; chatId: string }): Observable<any> {
-    return this.http.post(`${this.messageUrl}`, messageData);
+    const headers = { 'Content-Type': 'application/json' }; // Explicitly set the Content-Type
+  return this.http.post(`${this.messageUrl}`, messageData, { headers });
+  }
+  sendPhoto(messageData: FormData): Observable<any> {
+  return this.http.post(`${this.messageUrl}/photo`, messageData, );
   }
   getUserIdFromToken(): string | null {
     const token = localStorage.getItem('token');

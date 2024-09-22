@@ -54,18 +54,19 @@
       <div class="flex-grow-1 p-3  overflow-auto chat-messages " *ngIf="selectedChat">
         @for (message of messages; track $index) {
         <div class="mb-2">
-          <div class="p-2 rounded shadow-sm bg-white text-black d-inline-block mb-2 color-black ms-2 ">
+          <div class=" rounded shadow-sm bg-white text-black d-flex flex-column mb-2 color-black ms-2 w-50 ">
             <!-- @if (message.updatedAt) {
              
                  <span class="fs-1 color-black">{{ message.updatedAt | date:"shortTime"}}</span>
             } -->
             @if (message.photo) {
-               <img [src]="message.photo" alt="Uploaded Image" class="img-fluid mb-2"
+               <img [src]="message.photo" alt="Uploaded Image" class="img-fluid mb-2 w-50 h-auto rounded"
                 (click)="openImageModal(message.photo)" />
              }
             @if (message.content) {
               <p class="m-2 fs-6 color-black">{{ message?.content }}</p>
             }
+            
             <small class="text-muted">{{  message.updatedAt | date:"shortTime"}}</small>
           </div>
 

@@ -174,32 +174,33 @@ userId=localStorage.getItem('userId')
 
   handleFileInput(event: any) {
     const file: File = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (this.selectedChat) {
-          // this.selectedChat.messages.push({
-          //   text: '',
-          //   time: new Date().toLocaleTimeString(),
-          //   imageUrl: reader.result as string,
-          //   sender: 'me',
-          // });
-          // this.selectedChat.time = new Date().toLocaleTimeString();
+    
+    if (file && this.selectedChat) {
+      const formData = new FormData();
+      formData.append('photo', file);  // Append the file
+      formData.append('chatId', this.selectedChat._id);  // Append the chat ID
+  
+      this.chatService.sendPhoto(formData).subscribe(
+        (response) => {
+          console.log('Photo sent successfully:', response);
+          this.messages.push(response);  // Optionally update the UI with the new message
           setTimeout(() => this.scrollToBottom(), 0);
+        },
+        (error) => {
+          console.log('Error sending photo:', error);
         }
-      };
-      reader.readAsDataURL(file);
+      );
     }
   }
-
+  
   onEnterPress(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       this.sendMessage();
     }
   }
 
-  openImageModal(imageUrl: string) {
-    this.modalImage = imageUrl;
+  openImageModal(photo: string) {
+    this.modalImage = photo;
   }
 
   closeImageModal() {
