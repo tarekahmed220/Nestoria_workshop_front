@@ -187,9 +187,13 @@ userId=localStorage.getItem('userId')
           setTimeout(() => this.scrollToBottom(), 0);
         },
         (error) => {
-          console.log('Error sending photo:', error);
+          console.log('Error sending photo:', error.error.message);
+          alert(error.error.message);
         }
       );
+    }
+    else {
+      console.error('No file selected or no chat selected');
     }
   }
   
