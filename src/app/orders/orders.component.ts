@@ -28,18 +28,17 @@ export class OrdersComponent implements OnInit {
   getAllOrders() {
     this.ordersServ.getAllOrders().subscribe((order) => {
       this.orders = order;
-      // console.log(order);
+      console.log(order);
     });
   }
   getPendingOrders() {
     this.ordersServ.getPendingOrders().subscribe(
       (response) => {
         if (response.message === 'No pending orders found for this workshop') {
-          console.log(response.message);
+          // console.log(response.message);
           this.pendingOrders = [];
         } else {
           this.pendingOrders = response;
-          console.log(this.shippedOrders);
         }
       },
       (error) => {
@@ -51,11 +50,11 @@ export class OrdersComponent implements OnInit {
     this.ordersServ.getShippedOrders().subscribe(
       (response) => {
         if (response.message === 'No shipped orders found for this workshop') {
-          console.log(response.message);
+          // console.log(response.message);
           this.shippedOrders = [];
         } else {
           this.shippedOrders = response;
-          console.log(this.shippedOrders);
+          // console.log(this.shippedOrders);
         }
       },
       (error) => {
@@ -63,8 +62,11 @@ export class OrdersComponent implements OnInit {
       }
     );
   }
+
   ngOnInit(): void {
+    this.getAllOrders();
     this.getPendingOrders();
+    this.getShippedOrders();
   }
 
   // قائمة الطلبات المشحونة
@@ -97,27 +99,7 @@ export class OrdersComponent implements OnInit {
   }
 
   sendOrder(id: string) {}
-  deleteOrder(productId: string, orderId: string, color: string, content: any) {
-    const modalRef = this.modalService.open(content);
-    modalRef.result.then(
-      (result) => {
-        if (result === 'confirm') {
-          this.ordersServ.cancelOrder(productId, orderId, color).subscribe(
-            (response) => {
-              this.isClickCancel = true;
-              this.getPendingOrders();
-            },
-            (error) => {
-              console.error('Error cancel order:', error);
-            }
-          );
-        }
-      },
-      (reason) => {
-        console.log('Modal dismissed');
-      }
-    );
-  }
+
   // cancelOrder(productId: string, orderId: string, color: string,content: any) {
   //   this.isClickCancel = true;
   //   this.modalService.open(content);
@@ -141,7 +123,11 @@ export class OrdersComponent implements OnInit {
           this.ordersServ.cancelOrder(productId, orderId, color).subscribe(
             (response) => {
               this.isClickCancel = true;
-              this.getShippedOrders();
+              if(this.activeTab === "pending"){
+                this.getPendingOrders();
+              }else if(this.activeTab === "shipped"){
+                this.getShippedOrders();
+              }
             },
             (error) => {
               console.error('Error cancel order:', error);
