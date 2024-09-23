@@ -1,16 +1,41 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Chat, Message } from '../models/IChat';
+import {io} from 'socket.io-client';
 import { Observable } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class ChatService {
   private apiUrl = 'http://localhost:5000/api/v1/fur/chat';
   private messageUrl = 'http://localhost:5000/api/v1/fur/message';
   // public userId: string | null = '';
   constructor(private http: HttpClient) { }
+  public socket = io('http://localhost:5000', {
+    transports: ['websocket', 'polling'],
+    withCredentials: true
+  });
+  // this.socket.on('connect', () => {
+  //   console.log('Connected to the server');
+  // });
+  
+  sendSocketMessage(message: string){
+    this.socket.emit('new message', message);
+  }
+
+  getSocketMessages() : Observable<{content:string, chatId:string}> {
+    return new Observable (observer => {
+      this.socket.on('message received', (messageData:{content:string, chatId:string}) => {
+        observer.next(messageData);
+      });
+      return () => { this.socket.disconnect(); };  
+    });
+    
+  }
+
   getChat(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}`);
   }
