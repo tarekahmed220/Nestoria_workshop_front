@@ -103,9 +103,12 @@
 
       <!-- Message Input -->
       <div class="bg-white p-3 border-top d-flex align-items-center justify-content-between" *ngIf="selectedChat">
-        <input type="text" class="form-control me-2" [(ngModel)]="content" (keydown)="onEnterPress($event)"
+        <!-- <input type="text" class="form-control me-2" [(ngModel)]="content" (keydown)="onEnterPress($event)" -->
+        <input type="text" class="form-control me-2" [(ngModel)]="message" (keydown)="onEnterPress($event)"
+
           placeholder="Type a message..." />
-        <button class="btn btn-warning-custom me-2" (click)="sendMessage()">
+        <button class="btn btn-warning-custom me-2" (click)="sendSocketMessage()">
+          <!--         <button class="btn btn-warning-custom me-2" (click)="sendSocketMessage()"> -->
           <i class="fa fa-paper-plane"></i>
         </button>
 
