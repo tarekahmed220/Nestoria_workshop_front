@@ -1,7 +1,6 @@
 /* Global settings */
 * {
   scrollbar-width: none; /* For Firefox */
- 
 }
 
 ::-webkit-scrollbar {
@@ -18,8 +17,8 @@
   background-color: #2e2e40 !important;
   border-color: #e39c3b !important;
 }
-.bg-otherone{
-  background-color: #9e988e !important;
+.bg-otherone {
+  background-color: #e4e3e1bd !important;
 }
 /* Header Text Color */
 .text-light {
@@ -67,7 +66,6 @@
   word-wrap: break-word;
   border: 1px solid #e39c3b; /* Border color for messages */
 }
-
 
 .message-box.other {
   background-color: #2e2e40;
@@ -155,51 +153,61 @@
 
 /* Desktop Styles */
 
-  .bg-dark-custom {
-    background-color: #2e2e40;
+.bg-dark-custom {
+  background-color: #2e2e40;
+}
+
+.bg-header-custom {
+  background-color: #2e2e40;
+  color: #fff;
+}
+
+.bg-warning-custom {
+  background-color: #f0ad4e;
+  color: #fff;
+}
+
+.btn-warning-custom {
+  background-color: #f0ad4e;
+  border-color: #f0ad4e;
+  color: #fff;
+}
+
+.btn-warning-custom:hover {
+  background-color: #e39c3b;
+  border-color: #e39c3b;
+}
+
+.chat-messages {
+  border-radius: 0.25rem;
+  border-color: #e39c3b;
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    order: 2;
+    height: calc(100vh - 80px);
   }
 
-  .bg-header-custom {
-    background-color: #2e2e40;
-    color: #fff;
+  .col-md-8 {
+    order: 1;
   }
 
-  .bg-warning-custom {
-    background-color: #f0ad4e;
-    color: #fff;
+  .chat-header i {
+    font-size: 24px;
   }
-
-  .btn-warning-custom {
-    background-color: #f0ad4e;
-    border-color: #f0ad4e;
-    color: #fff;
-  }
-
-  .btn-warning-custom:hover {
-    background-color: #e39c3b;
-    border-color: #e39c3b;
-  }
-
-  .chat-messages {
-    border-radius: 0.25rem;
-    border-color: #e39c3b;
-
-  }
-
-  @media (max-width: 767px) {
-    .sidebar {
-      order: 2;
-      height: calc(100vh - 80px);
-     
-    }
-
-    .col-md-8 {
-      order: 1;
-
-    }
-
-    .chat-header i {
-      font-size: 24px;
-
-    }
-  }
+}
+.senderMessage {
+  max-width: 50%;
+  width: fit-content;
+}
+.receiverMessage {
+  max-width: 50%;
+  width: fit-content;
+}
+.chatContainer {
+  min-height: 80vh;
+  margin-top: 30px;
+  padding: 20px 15px;
+  border-radius: 10px;
+}
