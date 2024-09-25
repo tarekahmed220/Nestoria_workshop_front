@@ -1,9 +1,10 @@
 
-import { Component, HostListener } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Chat ,Message } from '../models/IChat';
+import { Chat ,Message, Sender } from '../models/IChat';
 import { ChatService } from '../services/chat.service';
+import { io } from 'socket.io-client';
 
 
 
@@ -14,79 +15,124 @@ import { ChatService } from '../services/chat.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
 })
-export class ChatComponent {
+
+// socket.on('reconnect', () => {
+//   console.log('Reconnected to socket');
+// });
+
+export class ChatComponent implements OnInit{
   chats: Chat[] = []
 lasestMessage: Message | null = null;
   filteredChats: Chat[] = [...this.chats];
   searchText = '';
   selectedChat:Chat | null = null; // Initially, no chat is selected
   content = '';
-// userId: string | null = '';
+  message: string='';
+ userId: string = localStorage.getItem('userId')  ||""
 messages: Message[] = [];
   modalImage: string | null = null;
   isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
   screenWidth: number;
-userId=localStorage.getItem('userId')
-  constructor(private chatService: ChatService) {
+
+  constructor(private chatService: ChatService, private zone: NgZone) {
     this.screenWidth = window.innerWidth; // Initialize the screen width
+  }
+  generateUniqueId(): string {
+    return Math.random().toString(36).substr(2, 9); // Simple unique ID generator
+  }
+  getCurrentUser(): Sender {
+    // Replace this with your actual logic to get the current user (probably from authentication service)
+    return {
+      _id: this.userId,
+      fullName: '',
+      email: '',
+      id:this.userId
+    };
   }
   ngOnInit(): void {
     
     this.getChats()
-    // this.selectChat()
-  
+    this.chatService.socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+    
+    this.chatService.socket.on('reconnect', () => {
+      console.log('Socket reconnected');
+      if (this.selectedChat) {
+        this.chatService.joinChat(this.selectedChat._id);  // إعادة الانضمام إلى المحادثة
+      }
+    });
+    if(this.selectedChat){
+   this.chatService.joinChat(this.selectedChat?._id)
+   this.chatService.getSocketMessages().subscribe((messageData: { content: string; chatId: string }) => {
+    console.log('Received message from socket:', messageData);
+    if (this.selectedChat && messageData.chatId === this.selectedChat._id) {
+      const newMessage: Message = {
+        _id: '',  // Generate a unique ID for the message
+        sender: this.getCurrentUser(), // Replace with your method to get the current user
+        photo: '',                     // Placeholder for photo, if there's no photo for the message
+        content: messageData.content,  // Message content
+        chat: this.selectedChat,       // Use the selected chat
+        readBy: [],                    // Initialize as an empty array (you can modify this as needed)
+        cloudinary_id: '',             // Placeholder for cloudinary ID, if applicable
+        createdAt: '',  // Timestamp for when the message was created
+        updatedAt: '',  // Timestamp for when the message was updated
+        __v: 0,                        // Default value for versioning
+        id: ''     // Another unique ID
+      };
+this.zone.run(() => {
+  this.messages.push(newMessage);
+})
+   
+      
+      // this.cd.detectChanges()
+      setTimeout(() => this.scrollToBottom(), 0);
+    }});
+    
+  };
+    
+    
+    
     
   }
-  getUserIdFromToken(): string | null {
-    const token = localStorage.getItem('token');
+ 
   
-    if (token) {
-      // JWT format is: header.payload.signature
-      const tokenParts = token.split('.');
-  
-      if (tokenParts.length === 3) {
-        // Decode the payload part (second part of the token)
-        const base64Url = tokenParts[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map((char) => {
-          return '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-  
-        // Parse the JSON payload to retrieve the userId
-        const payload = JSON.parse(jsonPayload);
-        console.log(payload.userId || payload.sub)
-        // Return the userId from the payload (assumed to be stored under 'userId' or 'sub')
-        return payload.userId || payload.sub;
+ 
 
+  sendSocketMessage() {
+    if(this.selectedChat && this.message.trim()) {
+      const messageData = {
+        content: this.message,
+        chatId: this.selectedChat._id
       }
+    this.chatService.sendSocketMessage(messageData);
+    this.message = '';
     }
-  
-    return null;
   }
-  // getUserIdFromToken();
-  // localStorage.setItem('userId', this.userId);
-  setUserId(userId: string) {
-    this.getUserIdFromToken()
-    this.userId=this.getUserIdFromToken()||'';
   
-  console.log(this.userId)
-  localStorage.setItem('userId', this.userId)
-  }
+  
+ 
+ 
   
   getChats() {
-    // const userId=JSON.stringify(localStorage.getItem('userId'))
-    // console.log(userId,'userId')
+  const socket = io('http://localhost:5000', {
+  transports: ['websocket', 'polling'],
+  withCredentials: true
+});
+socket.on('connect', () => {
+  console.log('Connected to the server');
+});
     this.chatService.setUserId()
-    this.chatService.getChat().subscribe((chat) => {
+    this.chatService.getChat().subscribe((chat:Chat[]) => {
       
       this.chats = chat
       console.log(this.chats)
       this.filteredChats = [...this.chats];
 
       },(error)=>console.log('Error fetching chats:'));
-      
-  
       this.filteredChats = [...this.chats];
+
+   
   }
  
   // Listen to window resize events to update the screen width
@@ -113,6 +159,7 @@ userId=localStorage.getItem('userId')
 
   selectChat(chat: Chat) {
      this.selectedChat = chat;
+     this.chatService.joinChat(this.selectedChat._id);
      this.chatService.getSelectedChat(this.selectedChat._id).subscribe((data: Message[]) => {
       this.messages = []; // Clear previous messages
       
@@ -124,6 +171,8 @@ userId=localStorage.getItem('userId')
           this.messages.push(message);
         }
       });
+
+      setTimeout(() => this.scrollToBottom(), 0);
     });
   
     if (this.isMobile()) {
@@ -141,11 +190,12 @@ userId=localStorage.getItem('userId')
         chatId: this.selectedChat._id
       };
       // Call the chat service to send the message as FormData
+
       this.chatService.sendMessage(messageData).subscribe(
         (response) => {
           console.log('Message sent successfully:', response);
           // Add the new message to the messages array (optional: depends on your API response)
-          this.messages.push(response);
+           this.messages.push(response);
           // Clear the input field after sending the message
           this.content = '';
           // Scroll to the bottom after sending the message
