@@ -1,5 +1,5 @@
 
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Chat ,Message, Sender } from '../models/IChat';
@@ -28,13 +28,13 @@ lasestMessage: Message | null = null;
   selectedChat:Chat | null = null; // Initially, no chat is selected
   content = '';
   message: string='';
- userId: string = JSON.stringify(localStorage.getItem('userId') ) ||""
+ userId: string = localStorage.getItem('userId')  ||""
 messages: Message[] = [];
   modalImage: string | null = null;
   isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
   screenWidth: number;
 
-  constructor(private chatService: ChatService, private cd:ChangeDetectorRef) {
+  constructor(private chatService: ChatService, private zone: NgZone) {
     this.screenWidth = window.innerWidth; // Initialize the screen width
   }
   generateUniqueId(): string {
@@ -52,8 +52,44 @@ messages: Message[] = [];
   ngOnInit(): void {
     
     this.getChats()
-   
+    this.chatService.socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
     
+    this.chatService.socket.on('reconnect', () => {
+      console.log('Socket reconnected');
+      if (this.selectedChat) {
+        this.chatService.joinChat(this.selectedChat._id);  // إعادة الانضمام إلى المحادثة
+      }
+    });
+    if(this.selectedChat){
+   this.chatService.joinChat(this.selectedChat?._id)
+   this.chatService.getSocketMessages().subscribe((messageData: { content: string; chatId: string }) => {
+    console.log('Received message from socket:', messageData);
+    if (this.selectedChat && messageData.chatId === this.selectedChat._id) {
+      const newMessage: Message = {
+        _id: '',  // Generate a unique ID for the message
+        sender: this.getCurrentUser(), // Replace with your method to get the current user
+        photo: '',                     // Placeholder for photo, if there's no photo for the message
+        content: messageData.content,  // Message content
+        chat: this.selectedChat,       // Use the selected chat
+        readBy: [],                    // Initialize as an empty array (you can modify this as needed)
+        cloudinary_id: '',             // Placeholder for cloudinary ID, if applicable
+        createdAt: '',  // Timestamp for when the message was created
+        updatedAt: '',  // Timestamp for when the message was updated
+        __v: 0,                        // Default value for versioning
+        id: ''     // Another unique ID
+      };
+this.zone.run(() => {
+  this.messages.push(newMessage);
+})
+   
+      
+      // this.cd.detectChanges()
+      setTimeout(() => this.scrollToBottom(), 0);
+    }});
+    
+  };
     
     
     
@@ -62,10 +98,16 @@ messages: Message[] = [];
  
   
  
+
   sendSocketMessage() {
-    this.chatService.sendSocketMessage(this.message);
+    if(this.selectedChat && this.message.trim()) {
+      const messageData = {
+        content: this.message,
+        chatId: this.selectedChat._id
+      }
+    this.chatService.sendSocketMessage(messageData);
     this.message = '';
-    
+    }
   }
   
   
@@ -81,7 +123,7 @@ socket.on('connect', () => {
   console.log('Connected to the server');
 });
     this.chatService.setUserId()
-    this.chatService.getChat().subscribe((chat) => {
+    this.chatService.getChat().subscribe((chat:Chat[]) => {
       
       this.chats = chat
       console.log(this.chats)
@@ -89,28 +131,8 @@ socket.on('connect', () => {
 
       },(error)=>console.log('Error fetching chats:'));
       this.filteredChats = [...this.chats];
-      this.chatService.getSocketMessages().subscribe((messageData: { content: string; chatId: string }) => {
-        if (this.selectedChat && messageData.chatId === this.selectedChat._id) {
-          const newMessage: Message = {
-            _id: '',  // Generate a unique ID for the message
-            sender: this.getCurrentUser(), // Replace with your method to get the current user
-            photo: '',                     // Placeholder for photo, if there's no photo for the message
-            content: messageData.content,  // Message content
-            chat: this.selectedChat,       // Use the selected chat
-            readBy: [],                    // Initialize as an empty array (you can modify this as needed)
-            cloudinary_id: '',             // Placeholder for cloudinary ID, if applicable
-            createdAt: new Date().toISOString(),  // Timestamp for when the message was created
-            updatedAt: new Date().toISOString(),  // Timestamp for when the message was updated
-            __v: 0,                        // Default value for versioning
-            id: ''     // Another unique ID
-          };
-    
-          this.messages.push(newMessage);
-          
-          this.cd.detectChanges()
-          setTimeout(() => this.scrollToBottom(), 0);
-        }
-      });
+
+   
   }
  
   // Listen to window resize events to update the screen width
@@ -137,6 +159,7 @@ socket.on('connect', () => {
 
   selectChat(chat: Chat) {
      this.selectedChat = chat;
+     this.chatService.joinChat(this.selectedChat._id);
      this.chatService.getSelectedChat(this.selectedChat._id).subscribe((data: Message[]) => {
       this.messages = []; // Clear previous messages
       
@@ -148,6 +171,8 @@ socket.on('connect', () => {
           this.messages.push(message);
         }
       });
+
+      setTimeout(() => this.scrollToBottom(), 0);
     });
   
     if (this.isMobile()) {
@@ -164,7 +189,6 @@ socket.on('connect', () => {
         content: this.content,
         chatId: this.selectedChat._id
       };
-      this.chatService.sendSocketMessage(messageData.content);
       // Call the chat service to send the message as FormData
 
       this.chatService.sendMessage(messageData).subscribe(

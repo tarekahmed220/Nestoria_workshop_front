@@ -13,29 +13,43 @@ export class ChatService {
   private apiUrl = 'http://localhost:5000/api/v1/fur/chat';
   private messageUrl = 'http://localhost:5000/api/v1/fur/message';
   // public userId: string | null = '';
-  constructor(private http: HttpClient) { }
-  public socket = io('http://localhost:5000', {
+  public socket:any;
+  constructor(private http: HttpClient) { 
+
+  this.socket   = io('http://127.0.0.1:5000', {
     transports: ['websocket', 'polling'],
     withCredentials: true
   });
-  // this.socket.on('connect', () => {
-  //   console.log('Connected to the server');
-  // });
+this.initializeSocket();}
+  initializeSocket() { this.socket.on('connect', () => {
+    console.log('Socket connected');
+  });
+  this.socket.on('disconnect', () => {
+    console.log('Socket disconnected');
+  });
+  this.socket.on('connect_error', (error: any) => {
+    console.error('Connection Error:', error);
+  });
   
-  sendSocketMessage(message: string){
-    this.socket.emit('new message', message);
+}
+  sendSocketMessage(messageData: { content: string; chatId: string }) {
+    
+ 
+    this.socket.emit('new message', messageData);
   }
 
   getSocketMessages() : Observable<{content:string, chatId:string}> {
     return new Observable (observer => {
-      this.socket.on('message received', (messageData:{content:string, chatId:string}) => {
+      this.socket.on('receive message', (messageData:{content:string, chatId:string}) => {
         observer.next(messageData);
       });
       return () => { this.socket.disconnect(); };  
     });
     
   }
-
+joinChat(chatId: string) {
+  this.socket.emit('join chat', chatId);
+}
   getChat(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}`);
   }
