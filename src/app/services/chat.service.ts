@@ -38,9 +38,9 @@ this.initializeSocket();}
     this.socket.emit('new message', messageData);
   }
 
-  getSocketMessages() : Observable<{content:string, chatId:string}> {
+  getSocketMessages() : Observable<{content:string, chat:Chat}> {
     return new Observable (observer => {
-      this.socket.on('receive message', (messageData:{content:string, chatId:string}) => {
+      this.socket.on('receive message', (messageData:{content:string, chat:Chat}) => {
         observer.next(messageData);
       });
       return () => { this.socket.disconnect(); };  

@@ -64,9 +64,9 @@ messages: Message[] = [];
     });
     if(this.selectedChat){
    this.chatService.joinChat(this.selectedChat?._id)
-   this.chatService.getSocketMessages().subscribe((messageData: { content: string; chatId: string }) => {
+   this.chatService.getSocketMessages().subscribe((messageData: { content: string; chat: Chat }) => {
     console.log('Received message from socket:', messageData);
-    if (this.selectedChat && messageData.chatId === this.selectedChat._id) {
+    if (this.selectedChat && messageData.chat._id === this.selectedChat._id) {
       const newMessage: Message = {
         _id: '',  // Generate a unique ID for the message
         sender: this.getCurrentUser(), // Replace with your method to get the current user
@@ -84,7 +84,12 @@ this.zone.run(() => {
   this.messages.push(newMessage);
 })
    
-      
+this.chatService.socket.on('refresh chats', (updatedChats: Chat[]) => {
+  this.chats = updatedChats;
+  this.filteredChats = [...this.chats];
+  console.log('Updated chats received:', updatedChats);
+});
+
       // this.cd.detectChanges()
       setTimeout(() => this.scrollToBottom(), 0);
     }});
@@ -92,7 +97,7 @@ this.zone.run(() => {
   };
     
     
-    
+ 
     
   }
  

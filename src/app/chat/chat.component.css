@@ -18,7 +18,9 @@
   background-color: #2e2e40 !important;
   border-color: #e39c3b !important;
 }
-
+.bg-otherone{
+  background-color: #9e988e !important;
+}
 /* Header Text Color */
 .text-light {
   color: #f1f1f1 !important;
