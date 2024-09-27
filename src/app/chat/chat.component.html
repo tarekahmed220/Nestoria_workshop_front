@@ -22,15 +22,15 @@
             
           
              <span class="badge color-white p-3 ms-2 ">{{ chat.users[1].fullName }}</span>}
-             @else {
+             @else if((chat.users[1]._id === userId) || (chat.users[0]._id !== userId)) {
               <span class="badge color-white p-3 ms-2 ">{{ chat.users[0].fullName }}</span>}
-             
+             @else {<span></span>}
           </div>
-          <!-- @if (chat.latestMessage.content) { -->
-            <!-- <span>{{ chat.latestMessage.content }}</span>} -->
-            <!-- @else if (chat.latestMessage.photo) { -->
-            <!-- <span>photo</span>} -->
-            <!-- @else {<span></span>} -->
+          @if (chat.latestMessage.content) { 
+            <span>{{ chat.latestMessage.content }}</span>}
+            @else if (chat.latestMessage.photo) {
+            <span>photo</span>}
+             @else {<span></span>} 
           <span class="badge bg-warning-custom">{{ chat.updatedAt| date : "shortTime" }}</span>
         </li>
         }
@@ -80,7 +80,8 @@
             }
             
             <small class="text-muted">{{  message.updatedAt | date:"shortTime"}}</small>
-          </div>}
+          </div>
+        }
 <!-- receiver -->
           @else {
           <div class=" rounded shadow-sm bg-otherone text-black d-flex flex-column mb-2 color-black  w-50 ">

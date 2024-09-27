@@ -15,53 +15,35 @@ export class ChatService {
   // public userId: string | null = '';
   public socket:any;
   chats :Chat[]=[]
+  // private chatsSubject: BehaviorSubject<Chat[]> = new BehaviorSubject<Chat[]>([]);
+  // public employees$: Observable<IEmployee[]> = this.employeesSubject.asObservable();
   constructor(private http: HttpClient) { 
 
   this.socket   = io('http://localhost:5000', {
     transports: ['websocket', 'polling'],
-    withCredentials: true
+    withCredentials: true,
+    autoConnect: true,
+    reconnection: true, // تمكين إعادة المحاولة
+    reconnectionAttempts: 5, // عدد محاولات إعادة الاتصال
+    reconnectionDelay: 5000 // مدة الانتظار بين كل محاولة
   });
 this.initializeSocket();}
-//   initializeSocket() { this.socket.on('connect', () => {
-//     console.log('Socket connected');
-//   });
-//   this.socket.on('disconnect', () => {
-//     console.log('Socket disconnected');
-//   });
-//   this.socket.on('connect_error', (error: any) => {
-//     console.error('Connection Error:', error);
-//   });
-  
-// }
-//   sendSocketMessage(messageData: { content: string; chat: Chat }) {
-    
- 
-//     this.socket.emit('new message', messageData);
-//   }
 
-//   getSocketMessages() : Observable<{content:string, chat:Chat}> {
-//     return new Observable (observer => {
-//       this.socket.on('receive message', (messageData:{content:string, chat:Chat}) => {
-//         observer.next(messageData);
-//       });
-//       return () => { this.socket.disconnect(); };  
-//     });
-    
-//   }
-// joinChat(chatId: string) {
-//   this.socket.emit('join chat', chatId);
-// }
 initializeSocket() {
-  // this.socket=io('http://localhost:500')
+ 
   console.log('Socket connected',this.socket);
-
-  this.socket.on('connect', () => {
+  console.log("Initializing socket...");
+  this.socket.on('connected', () => {
     console.log('Socket connected');
   });
-  this.socket.on("refresh chats", (updatedChats:any) => {
+  
+
+
+  // استمع لتحديثات المحادثات
+  this.socket.on("refresh chats", (updatedChats: Chat[]) => {
     // تحديث قائمة المحادثات في واجهة المستخدم
-    this.chats = updatedChats;
-    console.log("Chats updated on the client:", this.chats);
+    console.log("Chats updated on the client:", updatedChats);
+    this.chats = updatedChats; // تأكد أن لديك this.chats في الخدمة
   });
   this.socket.on('disconnect', () => {
     console.log('Socket disconnected');
@@ -70,34 +52,100 @@ initializeSocket() {
   this.socket.on('connect_error', (error: any) => {
     console.error('Connection Error:', error);
   });
+ 
 }
 //send
-sendSocketMessage(messageData: { content: string; chat: Chat }) {
+sendSocketMessage(messageData: Message) {
   console.log("socket msg ",messageData)
   if (messageData.chat && messageData.chat._id) {
     this.socket.emit('new message', messageData); // إرسال الرسالة
+    
   } else {
     console.error('Chat ID is missing, cannot send message.');
   }}
 //receive
-getSocketMessages(): Observable<{content: string; chat: Chat}> {
+getSocketMessages(): Observable<Message> {
   return new Observable((observer) => {
-    this.socket.on('receive message', (messageData: {content: string; chat: Chat}) => {
+    this.socket.on('receive message', (messageData: Message) => {
       console.log("msg received from server",messageData)
       observer.next(messageData);
     });
+    return () => {
+      this.socket.off('receive message');
+    };
   });
 }
+refreshChats(): Observable<any[]> {
+  return new Observable((observer) => {
+    this.socket.on('refresh chats', (updatedChats: any[]) => {
+      console.log("Chats updated on the server:", updatedChats);
+      observer.next(updatedChats);
+    });
 
+    return () => {
+      this.socket.off('refresh chats');
+    };
+  });
+}
 joinChat(chatId: string) {
   console.log("Attempting to join room:", chatId);
+  if (this.socket.connected) {
   this.socket.emit('join chat', chatId, (response: any) => {
     if (response && response.success) {
       console.log("Successfully joined room:", chatId);
     } else {
-      console.error("Failed to join room:", chatId, response);
+      console.log("Failed to join room:", chatId, response);
     }
+  });}
+  else {
+    console.log("Socket is not connected, cannot join room:", chatId);
+  }
+}
+// إرسال الحدث setup إلى الخادم مع بيانات المستخدم
+
+  // إرسال حدث setup مع بيانات المستخدم
+  setupUser(userData: any) {
+    this.socket.emit('setup', userData);
+  }
+
+  // الاستماع لحدث 'connected'
+  listenForConnected(): Observable<any> {
+    return new Observable((observer) => {
+      this.socket.on('connected', () => {
+        console.log('User connected');
+        observer.next(true);
+      });
+    });
+  }
+
+  // الاستماع لحدث 'onlineUsers'
+  listenForOnlineUsers(): Observable<any[]> {
+    return new Observable((observer) => {
+      this.socket.on('onlineUsers', (users: any[]) => {
+        console.log('Online users:', users);
+        observer.next(users);
+      });
+    });
+  }
+  
+  // إيقاف الاستماع للأحداث
+  disconnectListeners() {
+    this.socket.off('connected');
+    this.socket.off('onlineUsers');
+  }
+// الاستماع للأحداث الأخرى
+listenToSetup(): Observable<any> {
+  return new Observable((observer) => {
+    this.socket.on('setup', (response: any) => {
+      console.log('Setup event received:', response);
+      observer.next(response);
+    });
   });
+}
+
+// إلغاء الاستماع للحدث
+disconnectFromSetup() {
+  this.socket.off('setup');
 }
 
   getChat(): Observable<any> {

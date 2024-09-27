@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Chat ,Message, Sender } from '../models/IChat';
 import { ChatService } from '../services/chat.service';
 import { io } from 'socket.io-client';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 
 
 
@@ -16,11 +17,9 @@ import { io } from 'socket.io-client';
   styleUrls: ['./chat.component.css'],
 })
 
-// socket.on('reconnect', () => {
-//   console.log('Reconnected to socket');
-// });
 
-export class ChatComponent implements OnInit{
+
+export class ChatComponent implements OnInit,OnDestroy{
   chats: Chat[] = []
 lasestMessage: Message | null = null;
   filteredChats: Chat[] = [...this.chats];
@@ -33,116 +32,124 @@ messages: Message[] = [];
   modalImage: string | null = null;
   isSidebarVisible: boolean = true; // Controls visibility of the sidebar on mobile
   screenWidth: number;
-socketMsg:any;
-
-  constructor(private chatService: ChatService, private zone: NgZone) {
+  onlineUsers: any[] = [];
+  private connectedSubscription !: Subscription;
+  private onlineUsersSubscription !: Subscription;
+private messageSubscription!: Subscription;
+private chatsSubscription!: Subscription;
+  constructor(private chatService: ChatService, private zone: NgZone ,private cd: ChangeDetectorRef) {
     this.screenWidth = window.innerWidth; // Initialize the screen width
   }
-  // generateUniqueId(): string {
-  //   return Math.random().toString(36).substr(2, 9); // Simple unique ID generator
-  // }
-  // getCurrentUser(): Sender {
-  //   // Replace this with your actual logic to get the current user (probably from authentication service)
-  //   return {
-  //     _id: this.userId,
-  //     fullName: '',
-  //     email: '',
-  //     id:this.userId
-  //   };
-  // }
+  private destroy$ = new Subject<void>(); 
+ 
+ 
+  
+ 
+
+
+  
+  
+ 
+ 
+  
+
   // ngOnInit(): void {
+  //   this.chatService.initializeSocket();  
+  //   this.listenForMessages(); 
     
-  //   this.getChats()
-  
-    
+  //   this.listenForRefreshChats()
+  //   this.initializeSocketListeners();
+  //   this.getChats();
   // }
- 
-  
- 
-
-  // sendSocketMessage() {
-  //   if(this.selectedChat && this.message.trim()) {
-  //     const messageData = {
-  //       content: this.message,
-  //       chat: this.selectedChat
-  //     }
-  //   this.socketMsg=this.chatService.sendSocketMessage(messageData);
-  //   this.messages.push(this.socketMsg)
-  //   // this.socketMsg = '';
-  //   }
-  // }
-  
-  
- 
- 
-  
- /* getChats() {
-    this.chatService.setUserId()
-    this.chatService.getChat().subscribe((chat:Chat[]) => {
-      this.chats = chat
-      console.log(this.chats)
-      this.filteredChats = [...this.chats];
-
-      },(error)=>console.log('Error fetching chats:'));
-      this.filteredChats = [...this.chats];
-
-   
-    if(this.selectedChat){
-    this.chatService.joinChat(this.selectedChat?._id)
-    this.chatService.getSocketMessages().subscribe((messageData: { content: string; chat: Chat }) => {
-      console.log('Received message from socket:', messageData);
-      if (this.selectedChat && messageData.chat._id === this.selectedChat._id) {
-        const newMessage: Message = {
-          _id: '', 
-          sender: this.getCurrentUser(),
-          photo: '', 
-          content: messageData.content, 
-          chat: this.selectedChat, 
-          readBy: [], 
-          cloudinary_id: '', 
-          createdAt: '', 
-          updatedAt: '', 
-          __v: 0, 
-          id: '' 
-        };
-  
-        this.zone.run(() => {
-          this.messages.push(newMessage);
-        });
-  
-        setTimeout(() => this.scrollToBottom(), 0);
-      }
-    });
-  }}
-  */
   ngOnInit(): void {
-    this.chatService.initializeSocket();  // تأكد من تهيئة الاتصال بالـ socket
-    this.listenForMessages(); 
+  this.socketConnected()
+    this.chatService.initializeSocket();  //      socket
+    // console.log("Socket connected:", this.chatService.socket.connected); //    
+ 
+  this.setupUser()
+  
+    //   'onlineUsers'
+    this.onlineUsersCount()
+  
+    this.getChats(); 
+    if (this.selectedChat) {
+      this.chatService.joinChat(this.selectedChat._id);  //     
+    }
     
-    this.listenForRefreshChats()
-    this.getChats();
-  }
+  this.recieveMessages()
+ 
+   this.refreshChats()
+  
 
-  // دالة إرسال الرسالة
+    this.chatService.socket.on('connect_error', (error: any) => {
+      console.error('Connection Error:', error);
+    });
+  
+
+
+}
+
+
+
+  socketConnected() {
+    this.chatService.listenForConnected().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      console.log('User is successfully connected to the server');
+    });
+  }
+  setupUser() {
+    const userData = {
+      _id: this.getCurrentUser()._id, 
+      name: ''
+    };
+
+    // إرسال بيانات المستخدم عند التحميل
+    this.chatService.setupUser(userData);
+
+    // الاستماع لحدث setup
+    this.chatService.listenToSetup().pipe(
+      takeUntil(this.destroy$)  //      destroy$
+    ).subscribe((response) => {
+      console.log('Setup response from server:', response);
+    });
+  }
+  onlineUsersCount() {
+    this.chatService.listenForOnlineUsers().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((users) => {
+      this.onlineUsers = users;
+      console.log('Online users updated:', this.onlineUsers);
+    });
+  }
   sendSocketMessage() {
     console.log("Preparing to send message:", this.message);
     if (this.selectedChat && this.message.trim()) {
       const messageData = {
         content: this.message,
-        chat: this.selectedChat
+        chat: this.selectedChat,
+        _id: '',  // هنا يمكنك إضافة ID مميز
+        sender: this.getCurrentUser(),
+        
+      
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        readBy: [],
+        cloudinary_id: '', 
+        photo: '',
+        id: '',
+        __v:0,
       };
       console.log("Socket status:", this.chatService.socket.connected);
-      this.chatService.joinChat(this.selectedChat?._id);  // تأكد أن المستخدم ينضم للغرفة عند التهيئة
-      setTimeout(() => {
+         
+      
         this.chatService.sendSocketMessage(messageData);
         console.log("Sent message via socket:", messageData);
-      }, 500); // إعطاء بعض الوقت للانضمام للغرفة
-      // إرسال الرسالة عبر socket
-      // this.chatService.sendSocketMessage(messageData);
+     
+
       console.log("msg socket",messageData)
-      // إضافة الرسالة إلى القائمة بعد الإرسال
       const newMessage: Message = {
-        _id: '',  // هنا يمكنك إضافة ID مميز
+        _id: '',  //
         sender: this.getCurrentUser(),
         content: this.message,
         chat: this.selectedChat,
@@ -184,35 +191,84 @@ socketMsg:any;
     (error) => {
       console.error('Error sending message:', error);
     }
-  );}
+  );
+  
+}
   }
 
-  // الاستماع إلى الرسائل من الـ socket
-  listenForMessages() {
-    this.chatService.getSocketMessages().subscribe((messageData: {content: string; chat: Chat}) => {
-      console.log("msg",messageData)
-      if (this.selectedChat && messageData.chat._id === this.selectedChat._id) {
-        const newMessage: Message = {
-          _id: '',
-          sender: this.getCurrentUser(),
-          content: messageData.content,
-          chat: this.selectedChat,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          readBy: [],
-          cloudinary_id: '',
-          photo:'',
-          __v:0,
-          id: ''
-        };
-
-        this.zone.run(() => {
-          this.messages.push(newMessage);  // تحديث الرسائل الواردة من الـ socket
-        });
-      }
+ recieveMessages() {
+  console.log("Listening for incoming messages...");
+  this.chatService.getSocketMessages().pipe(
+    takeUntil(this.destroy$)
+  ).subscribe((messageData) => {
+    if (this.selectedChat && messageData.chat._id === this.selectedChat._id) {
+      this.addMessageToChat(messageData);
+    }
+  });
+ }
+ refreshChats() {
+   // this.listenForRefreshChats()
+ 
+   console.log("Subscribing to refresh chats...");
+   this.chatService.refreshChats().pipe(
+     takeUntil(this.destroy$)
+   ).subscribe((updatedChats) => {
+    //  this.zone.run(() => {
+      this.cd.detectChanges();
+       this.chats = updatedChats;
+    //  });
+     
+   });
+ }
+  //   listenForMessages() {
+  //     this.chatService.getSocketMessages().subscribe((messageData: {content: string; chat: Chat}) => {
+  //       console.log("Message received:", messageData);
+  //       if (this.selectedChat && messageData.chat._id === this.selectedChat._id) {
+  //         this.addMessageToChat(messageData);  // إضافة الرسالة إلى المحادثة
+  //       }
+      
+  //     });
+     
+  // }
+  addMessageToChat(messageData: {content: string; chat: Chat}) {
+    const newMessage: Message = {
+      _id: '',  // استخدام المعرف الوارد من الخادم
+      sender: this.getCurrentUser(),
+      content: messageData.content,
+      chat: messageData.chat,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      readBy: [],
+      cloudinary_id: '',
+      photo: '',
+      __v: 0,
+      id: ''
+    };
+  
+    this.zone.run(() => {
+      this.messages.push(newMessage);  // تحديث الرسائل الواردة من الـ socket
     });
+    setTimeout(() => this.scrollToBottom(), 0);
+    
   }
+  ngOnDestroy(): void {
+    console.log("ngOnDestroy called, subscription should be canceled.");
+   this.destroy$.next();
+   this.destroy$.complete();
 
+    // this.chatService.disconnectListeners();
+  }
+  listenForRefreshChats() {
+    this.chatService.socket.on("refresh chats", (updatedChats: Chat[]) => {
+        console.log("Received updated chat:", updatedChats);
+        this.zone.run(() => {
+          
+            this.chats = updatedChats;
+        });
+    });
+}
+  
+  
   // دالة جلب المحادثات
   getChats() {
     this.chatService.getChat().subscribe((chats: Chat[]) => {
@@ -220,25 +276,24 @@ socketMsg:any;
       console.log(this.chats);
       if(!this.selectedChat && this.chats.length >0){
         this.selectedChat=this.chats[0]
-      }
-      if(this.selectedChat){
+      
         this.chatService.joinChat(this.selectedChat._id)
       }
     });
   }
-  updatedChats:Chat[]=[]
-  listenForRefreshChats() {
+  // updatedChats:Chat[]=[]
+  // listenForRefreshChats() {
     
-    this.chatService.socket.on("refresh chats", (updatedChats:any) => {
+  //   this.chatService.socket.on("refresh chats", (updatedChats:any) => {
       
-      console.log("Received updated chats:", updatedChats);
-      this.chatService.getChat().subscribe((chats:Chat[])=>{
-         this.updatedChats=chats
-        console.log(chats)
-      })
-      this.chats = this.updatedChats; // تحديث قائمة المحادثات
-    });
-  }
+  //     console.log("Received updated chats:", updatedChats);
+  //     this.chatService.getChat().subscribe((chats:Chat[])=>{
+  //        this.updatedChats=chats
+  //       console.log(chats)
+  //     })
+  //     this.chats = this.updatedChats; // تحديث قائمة المحادثات
+  //   });
+  // }
   // دالة لجلب المستخدم الحالي
   getCurrentUser(): Sender {
     return {
@@ -297,31 +352,31 @@ socketMsg:any;
   }
 
  
-  sendMessage() {
-    if (this.content.trim() && this.selectedChat) {
-      // Create FormData object and append the message content and chat ID
-      const messageData = {
-        content: this.content,
-        chatId: this.selectedChat._id
-      };
-      // Call the chat service to send the message as FormData
+  // sendMessage() {
+  //   if (this.content.trim() && this.selectedChat) {
+  //     // Create FormData object and append the message content and chat ID
+  //     const messageData = {
+  //       content: this.content,
+  //       chatId: this.selectedChat._id
+  //     };
+  //     // Call the chat service to send the message as FormData
 
-      this.chatService.sendMessage(messageData).subscribe(
-        (response) => {
-          console.log('Message sent successfully:', response);
-          // Add the new message to the messages array (optional: depends on your API response)
-          //  this.messages.push(response);
-          // Clear the input field after sending the message
-          this.content = '';
-          // Scroll to the bottom after sending the message
-          setTimeout(() => this.scrollToBottom(), 0);
-        },
-        (error) => {
-          console.error('Error sending message:', error);
-        }
-      );
-    }
-  }
+  //     this.chatService.sendMessage(messageData).subscribe(
+  //       (response) => {
+  //         console.log('Message sent successfully:', response);
+  //         // Add the new message to the messages array (optional: depends on your API response)
+  //         //  this.messages.push(response);
+  //         // Clear the input field after sending the message
+  //         this.content = '';
+  //         // Scroll to the bottom after sending the message
+  //         setTimeout(() => this.scrollToBottom(), 0);
+  //       },
+  //       (error) => {
+  //         console.error('Error sending message:', error);
+  //       }
+  //     );
+  //   }
+  // }
   
   scrollToBottom() {
     const chatMessages = document.getElementById('chatMessages');
@@ -364,7 +419,7 @@ socketMsg:any;
   
   onEnterPress(event: KeyboardEvent) {
     if (event.key === 'Enter') {
-      this.sendMessage();
+      this.sendSocketMessage();
     }
   }
 
