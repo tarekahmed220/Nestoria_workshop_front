@@ -241,7 +241,7 @@ export class DashboardComponent implements OnInit {
   allDetails!: any;
   allProductsLength!: number;
   customers = signal([]);
-  customersA!:any;
+  customersA!: any;
   productsSoldLength!: number;
   currentPage = signal(1);
   itemsPerPage = 4;
@@ -271,9 +271,13 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchBalance() {
-    this.http.get('http://localhost:5000/api/v1/admin/get-balance').subscribe((res: any) => {
-      this.balance = res.sellerBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    });
+    this.http
+      .get('http://localhost:5000/api/v1/admin/get-balance')
+      .subscribe((res: any) => {
+        this.balance = res.sellerBalance
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      });
   }
 
   getAllDetails() {
@@ -319,7 +323,9 @@ export class DashboardComponent implements OnInit {
   public barChartType: ChartType = 'bar';
 
   // حساب إجمالي عدد الصفحات
-  totalPages = computed(() => Math.ceil(this.customers().length / this.itemsPerPage));
+  totalPages = computed(() =>
+    Math.ceil(this.customers().length / this.itemsPerPage)
+  );
 
   // الحصول على العملاء المرئيين للصفحة الحالية
   visibleCustomers = computed(() => {
@@ -334,7 +340,9 @@ export class DashboardComponent implements OnInit {
   }
 
   getPagesArray() {
-    return Array(this.totalPages()).fill(0).map((x, i) => i + 1);
+    return Array(this.totalPages())
+      .fill(0)
+      .map((x, i) => i + 1);
   }
 
   getColor(name: string): string {
@@ -342,7 +350,7 @@ export class DashboardComponent implements OnInit {
     return colors[name.charCodeAt(0) % colors.length];
   }
 
-    // بيانات المنتجات
+  // بيانات المنتجات
   products = [
     { name: 'Home Decore Range', popularity: 78, color: '#FFC107' },
     { name: 'Disney Princess Dress', popularity: 62, color: '#a9dfd8' },
