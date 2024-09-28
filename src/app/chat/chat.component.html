@@ -24,28 +24,21 @@
           (click)="selectChat(chat)"
         >
           <div class="d-flex align-items-center">
-            <i class="fa fa-user-circle me-2" style="font-size: 20px"></i>
-
-            @if((chat.users[0]._id === userId) || (chat.users[1]._id !==
-            userId)) {
-
-            <span class="badge color-white p-3 ms-2">{{
-              chat.users[1].fullName
-            }}</span
-            >} @else {
-            <span class="badge color-white p-3 ms-2">{{
-              chat.users[0].fullName
-            }}</span
-            >}
+            <i class="fa fa-user-circle me-2" style="font-size: 20px"></i> 
+          @if((chat.users[0]._id === userId) || (chat.users[1]._id !== userId)) {
+      
+             <span class="badge color-white p-3 ms-2 ">{{ chat.users[1].fullName }}</span>}
+             @else if((chat.users[1]._id === userId) || (chat.users[0]._id !== userId)) {
+              <span class="badge color-white p-3 ms-2 ">{{ chat.users[0].fullName }}</span>}
+             @else {<span></span>}
           </div>
-          <!-- @if (chat.latestMessage.content) { -->
-          <!-- <span>{{ chat.latestMessage.content }}</span>} -->
-          <!-- @else if (chat.latestMessage.photo) { -->
-          <!-- <span>photo</span>} -->
-          <!-- @else {<span></span>} -->
-          <span class="badge bg-warning-custom">{{
-            chat.updatedAt | date : "shortTime"
-          }}</span>
+          @if (chat.latestMessage.content) { 
+            <span>{{ chat.latestMessage.content }}</span>}
+            @else if (chat.latestMessage.photo) {
+            <span>photo</span>}
+             @else {<span></span>} 
+          <span class="badge bg-warning-custom">{{ chat.updatedAt| date : "shortTime" }}</span>
+
         </li>
         }
       </ul>
@@ -107,6 +100,7 @@
               />
               } @if (message.content) {
               <p class="m-2 fs-6 color-black">{{ message?.content }}</p>
+
               }
 
               <small class="text-muted me-2">{{
@@ -144,6 +138,7 @@
       </div>
 
       <!-- Message Input -->
+
       <div
         class="bg-white p-3 border-top d-flex align-items-center justify-content-between"
         *ngIf="selectedChat"
@@ -155,7 +150,7 @@
           (keydown)="onEnterPress($event)"
           placeholder="Type a message..."
         />
-        <button class="btn btn-warning-custom me-2" (click)="sendMessage()">
+       <button class="btn btn-warning-custom me-2" (click)="sendSocketMessage()">
           <i class="fa fa-paper-plane"></i>
         </button>
 
