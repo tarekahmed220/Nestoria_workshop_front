@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Chat, Message } from '../models/IChat';
 import {io} from 'socket.io-client';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 
 @Injectable({
@@ -15,36 +16,59 @@ export class ChatService {
   // public userId: string | null = '';
   public socket:any;
   chats :Chat[]=[]
-  // private chatsSubject: BehaviorSubject<Chat[]> = new BehaviorSubject<Chat[]>([]);
-  // public employees$: Observable<IEmployee[]> = this.employeesSubject.asObservable();
-  constructor(private http: HttpClient) { 
+   private chatsSubject: BehaviorSubject<Chat[]> = new BehaviorSubject<Chat[]>([]);
+   public chats$: Observable<Chat[]> = this.chatsSubject.asObservable();
+   private messagesSubject: BehaviorSubject<Message[]> = new BehaviorSubject<Message[]>([]);
+   public messages$: Observable<Message[]> = this.messagesSubject.asObservable();
+//   constructor(private http: HttpClient) { 
 
-  this.socket   = io('http://localhost:5000', {
-    transports: ['websocket', 'polling'],
-    withCredentials: true,
-    autoConnect: true,
-    reconnection: true, // تمكين إعادة المحاولة
-    reconnectionAttempts: 5, // عدد محاولات إعادة الاتصال
-    reconnectionDelay: 5000 // مدة الانتظار بين كل محاولة
-  });
-this.initializeSocket();}
-
+//   this.socket   = io('http://localhost:5000', {
+//     transports: ['websocket', 'polling'],
+//     withCredentials: true,
+//     autoConnect: true,
+//     reconnection: true, // تمكين إعادة المحاولة
+//     reconnectionAttempts: 5, // عدد محاولات إعادة الاتصال
+//     reconnectionDelay: 5000 // مدة الانتظار بين كل محاولة
+//   });
+// this.initializeSocket();}
+constructor(
+  private http: HttpClient,
+  @Inject(PLATFORM_ID) private platformId: object // حقن الـ platformId
+) {
+  // تحقق من أن الكود يعمل فقط في المتصفح
+  if (isPlatformBrowser(this.platformId)) {
+    this.socket = io('http://localhost:5000', {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+      autoConnect: true,
+      reconnection: true, // تمكين إعادة المحاولة
+      reconnectionAttempts: 5, // عدد محاولات إعادة الاتصال
+      reconnectionDelay: 5000 // مدة الانتظار بين كل محاولة
+    });
+    this.initializeSocket();
+  }
+}
 initializeSocket() {
- 
-  console.log('Socket connected',this.socket);
-  console.log("Initializing socket...");
+  // التأكد من أن socket يعمل فقط في بيئة المتصفح
+  if (!isPlatformBrowser(this.platformId)) {
+    return;
+  }
+
+  console.log('Initializing socket...');
   this.socket.on('connected', () => {
     console.log('Socket connected');
   });
-  
 
+  this.socket.on('receive message', (newMessage: Message) => {
+    this.handleNewMessage(newMessage);
+  });
 
   // استمع لتحديثات المحادثات
-  this.socket.on("refresh chats", (updatedChats: Chat[]) => {
-    // تحديث قائمة المحادثات في واجهة المستخدم
-    console.log("Chats updated on the client:", updatedChats);
-    this.chats = updatedChats; // تأكد أن لديك this.chats في الخدمة
+  this.socket.on('refresh chats', (updatedChats: Chat[]) => {
+    console.log('Chats updated on the client:', updatedChats);
+    this.chatsSubject.next(updatedChats);
   });
+
   this.socket.on('disconnect', () => {
     console.log('Socket disconnected');
   });
@@ -52,8 +76,35 @@ initializeSocket() {
   this.socket.on('connect_error', (error: any) => {
     console.error('Connection Error:', error);
   });
- 
 }
+// initializeSocket() {
+ 
+//   console.log('Socket connected',this.socket);
+//   console.log("Initializing socket...");
+//   this.socket.on('connected', () => {
+//     console.log('Socket connected');
+//   });
+  
+
+//   this.socket.on('receive message', (newMessage: Message) => {
+//     this.handleNewMessage(newMessage);
+//   });
+//   // استمع لتحديثات المحادثات
+//   this.socket.on("refresh chats", (updatedChats: Chat[]) => {
+//     // تحديث قائمة المحادثات في واجهة المستخدم
+//     console.log("Chats updated on the client:", updatedChats);
+//     // this.chats = updatedChats; // تأكد أن لديك this.chats في الخدمة
+//     this.chatsSubject.next(updatedChats);
+//   });
+//   this.socket.on('disconnect', () => {
+//     console.log('Socket disconnected');
+//   });
+
+//   this.socket.on('connect_error', (error: any) => {
+//     console.error('Connection Error:', error);
+//   });
+ 
+// }
 //send
 sendSocketMessage(messageData: Message) {
   console.log("socket msg ",messageData)
@@ -75,10 +126,26 @@ getSocketMessages(): Observable<Message> {
     };
   });
 }
+/*
+ loadMessagesForChat(chatId: string) {
+    // استدعاء API أو استرجاع الرسائل من قاعدة البيانات
+    this.socket.emit('get messages', chatId, (messages: Message[]) => {
+      this.messagesSubject.next(messages);
+    });
+  }
+*/
+handleNewMessage(newMessage: Message) {
+  const currentMessages = this.messagesSubject.getValue(); // الحصول على الرسائل الحالية
+  const updatedMessages = [...currentMessages, newMessage]; // إضافة الرسالة الجديدة
+  this.messagesSubject.next(updatedMessages); // تحديث BehaviorSubject
+}
 refreshChats(): Observable<any[]> {
   return new Observable((observer) => {
     this.socket.on('refresh chats', (updatedChats: any[]) => {
       console.log("Chats updated on the server:", updatedChats);
+        // تحديث BehaviorSubject بالمحادثات الجديدة
+        this.chatsSubject.next(updatedChats);
+
       observer.next(updatedChats);
     });
 
@@ -151,6 +218,22 @@ disconnectFromSetup() {
   getChat(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}`);
   }
+  updateChats(updatedChat: Chat, newMessage: Message) {
+    const currentChats = this.chatsSubject.getValue();  // الحصول على المحادثات الحالية
+    const chatIndex = currentChats.findIndex(chat => chat._id === updatedChat._id);  // إيجاد المحادثة المستهدفة
+
+    if (chatIndex !== -1) {
+      // تحديث المحادثة بإضافة الرسالة الجديدة
+      const updatedChats = [...currentChats];
+      updatedChats[chatIndex] = {
+        ...updatedChat,
+        latestMessage: newMessage,  // إضافة الرسالة الجديدة كأحدث رسالة
+      };
+      
+      this.chatsSubject.next(updatedChats);  // تحديث الـ BehaviorSubject بالمحادثات الجديدة
+    }
+  }
+
   getSelectedChat(_id: string): Observable<[Message]> {
     return this.http.get<[Message]>(`${this.messageUrl}/${_id}`);
   }

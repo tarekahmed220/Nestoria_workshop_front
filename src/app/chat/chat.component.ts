@@ -62,6 +62,10 @@ private chatsSubscription!: Subscription;
   //   this.getChats();
   // }
   ngOnInit(): void {
+    this.getChats(); 
+    if (this.selectedChat) {
+      this.chatService.joinChat(this.selectedChat._id);  //     
+    }
   this.socketConnected()
     this.chatService.initializeSocket();  //      socket
     // console.log("Socket connected:", this.chatService.socket.connected); //    
@@ -70,13 +74,15 @@ private chatsSubscription!: Subscription;
   
     //   'onlineUsers'
     this.onlineUsersCount()
-  
     this.getChats(); 
     if (this.selectedChat) {
       this.chatService.joinChat(this.selectedChat._id);  //     
     }
+    // this.chatService.messages$.subscribe((updatedMessages) => {
+    //   this.messages = updatedMessages;})
+   
     
-  this.recieveMessages()
+  // this.recieveMessages()
  
    this.refreshChats()
   
@@ -163,12 +169,21 @@ private chatsSubscription!: Subscription;
       };
 
       this.zone.run(() => {
+        
+    
         this.messages.push(newMessage);  // تحديث الرسائل في الواجهة
+        if (this.selectedChat) {
+          console.log('selectedChat:', this.selectedChat);
+          this.chatService.updateChats(this.selectedChat,newMessage); // تحديث المحادثات في الـ BehaviorSubject
+          this.cd.detectChanges();  // إجبار الواجهة على التحديث
+          console.log('Chats updated:', this.chats);
+        } else {
+          console.error('selectedChat is null, cannot update chats.');
+        }   
       });
-
       // this.message = '';  // تفريغ حقل الرسالة بعد الإرسال
     }
-     setTimeout(() => this.scrollToBottom(), 0);
+     
   // Call the chat service to send the message as FormData
  
   if ( this.message.trim()) {
@@ -192,6 +207,7 @@ private chatsSubscription!: Subscription;
       console.error('Error sending message:', error);
     }
   );
+   
   
 }
   }
@@ -213,7 +229,7 @@ private chatsSubscription!: Subscription;
    this.chatService.refreshChats().pipe(
      takeUntil(this.destroy$)
    ).subscribe((updatedChats) => {
-    //  this.zone.run(() => {
+      // this.zone.run(() => {
       this.cd.detectChanges();
        this.chats = updatedChats;
     //  });
