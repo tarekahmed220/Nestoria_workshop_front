@@ -1,0 +1,9 @@
+{
+    "/api": {
+      "target": "https://nestoria-server.vercel.app",
+      "secure": false,
+      "changeOrigin": true,
+      "logLevel": "debug"
+    }
+  }
+  

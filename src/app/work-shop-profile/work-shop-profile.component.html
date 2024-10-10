@@ -1,0 +1,127 @@
+<div class="container mt-5 text-white">
+  <!-- Workshop Details Display -->
+  <div *ngIf="!editMode" class="card bg-custom p-4 shadow text-white">
+    <div class="row align-items-center">
+      <div class="col-md-4 text-center">
+        <img
+          [src]="workshop.registrationDocuments.personalPhoto|| 'https://via.placeholder.com/150'"
+          alt="Profile Photo"
+          class="rounded-circle shadow avatar-img"
+        />
+      </div>
+      <div class="col-md-8">
+        <h2 class="display-6 text-highlight mb-4">{{ workshop.name }}</h2>
+        <p><strong>Email:</strong> {{ workshop.email }}</p>
+        <p><strong>Phone:</strong> {{ workshop.phone }}</p>
+        <p><strong>Address:</strong> {{ workshop.address }}</p>
+        <p><strong>Role:</strong> {{ workshop.role }}</p>
+        <p><strong>Balance:</strong> {{ workshop.balance | currency }}</p>
+        <p><strong>Orders Sold:</strong> {{ workshop.ordersSold }}</p>
+        <p><strong>Description:</strong> {{ workshop.description }}</p>
+      </div>
+    </div>
+
+
+
+    <button class="btn btn-outline-light btn-lg px-4 mt-3" (click)="toggleEditMode()">Edit</button>
+  </div>
+
+  <!-- Workshop Edit Form -->
+  <div *ngIf="editMode" class="card bg-custom p-4 shadow-lg">
+    <form (ngSubmit)="saveWorkshop()" #workshopForm="ngForm">
+      <div class="row">
+        <div class="col-md-4 text-center mb-3">
+          <img
+            [src]="workshop.registrationDocuments.personalPhoto  || 'https://via.placeholder.com/150'"
+            alt="Profile Photo"
+            class="rounded-circle shadow avatar-img"
+          />
+          <input
+            type="file"
+            class="form-control mt-3 bg-input"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+          />
+        </div>
+
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="fullName" class="form-label text-highlight">Full Name</label>
+              <input
+                id="fullName"
+                type="text"
+                name="fullName"
+                [(ngModel)]="workshopTemp.name"
+                required
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label text-highlight">Email</label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                [(ngModel)]="workshopTemp.email"
+                required
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="phone" class="form-label text-highlight">Phone</label>
+              <input
+                id="phone"
+                type="text"
+                name="phone"
+                [(ngModel)]="workshopTemp.phone"
+                required
+                pattern="^(010|011|012|015)[0-9]{8}$"
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="address" class="form-label text-highlight">Address</label>
+              <input
+                id="address"
+                type="text"
+                name="address"
+                [(ngModel)]="workshopTemp.address"
+                required
+                class="form-control form-control-lg bg-input"
+              />
+            </div>
+          </div>
+
+
+
+
+
+          <div class="mb-3">
+            <label for="description" class="form-label text-highlight">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              [(ngModel)]="workshopTemp.description"
+              class="form-control bg-input"
+            ></textarea>
+          </div>
+<div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3 ">
+  <button type="submit" class="btn btn-light btn-lg px-4 mt-3" [disabled]="!workshopForm.form.valid ">Save</button>
+  <button type="button" class="btn btn-outline-secondary btn-lg px-4 mt-3" (click)="toggleEditMode()">Cancel</button>
+</div>
+
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
