@@ -262,7 +262,8 @@ export class DashboardComponent implements OnInit {
         localStorage.setItem('token', token);
         this.router.navigate([`/dashboard/${token}`]);
       } else {
-        window.location.href = 'http://localhost:3000/login';
+        // window.location.href = 'http://localhost:3000/login';
+        window.location.href = 'https://nestoria-user-front.vercel.app/login';
       }
     });
 
